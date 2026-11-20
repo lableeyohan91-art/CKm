@@ -3,19 +3,27 @@
     "id": "date",
     "titre": "La date",
     "texte": "Le jeu suit le calendrier julien, celui du Moyen Âge. La partie commence le 6 janvier 1066, jour du couronnement de Harold, roi d’Angleterre. Le monde avance jour après jour, même quand vous ne faites rien.",
-    "voirAussi": ["vitesse", "pause"]
+    "voirAussi": [
+      "vitesse",
+      "pause"
+    ]
   },
   {
     "id": "pause",
     "titre": "La pause",
     "texte": "En pause, le temps s'arrête : vous pouvez tout consulter et préparer vos décisions. Le jeu se met aussi en pause tout seul quand une décision importante vous attend.",
-    "voirAussi": ["vitesse"]
+    "voirAussi": [
+      "vitesse"
+    ]
   },
   {
     "id": "vitesse",
     "titre": "Les vitesses",
     "texte": "Cinq vitesses : de quelques jours par seconde à plusieurs années par seconde. Vous pouvez aussi avancer d'un jour ou d'un mois à la main avec les boutons « +1 jour » et « +1 mois ».",
-    "voirAussi": ["pause", "date"]
+    "voirAussi": [
+      "pause",
+      "date"
+    ]
   },
   {
     "id": "sauvegarde",
@@ -28,5 +36,231 @@
     "titre": "La graine",
     "texte": "Mot qui détermine tout le hasard de la partie. Deux parties lancées avec la même graine et les mêmes décisions se déroulent exactement de la même façon. Utile pour reproduire une situation.",
     "voirAussi": []
+  },
+  {
+    "id": "personnage-joueur",
+    "titre": "Votre personnage et votre dynastie",
+    "texte": "Vous incarnez un seigneur. Il vieillira et mourra : vous continuerez alors avec son héritier. La partie ne s'arrête que si votre dynastie perd toutes ses terres. Pensez donc à long terme : mariages, héritiers, alliances.",
+    "voirAussi": [
+      "heritier",
+      "dynastie"
+    ]
+  },
+  {
+    "id": "observateur",
+    "titre": "Le mode observateur",
+    "texte": "Le monde évolue seul, sans personnage joueur. Utile pour découvrir le jeu ou voir comment l'histoire se déroule. Vous pouvez ouvrir toutes les fiches.",
+    "voirAussi": []
+  },
+  {
+    "id": "carte-modes",
+    "titre": "Les modes de carte",
+    "texte": "Politique : chaque couleur est un grand fief, c'est-à-dire un vassal direct d'un roi, avec tous ses arrière-vassaux. Dynasties : la couleur indique la famille du seigneur de chaque comté. Richesse : plus le comté est développé, plus il est foncé. Votre domaine est entouré d'or.",
+    "voirAussi": [
+      "developpement",
+      "vassal"
+    ]
+  },
+  {
+    "id": "developpement",
+    "titre": "Le développement",
+    "texte": "Mesure la richesse d'un comté : population, cultures, artisanat, marchés. Chaque point rapporte environ 0,1 pièce d'or par mois à son seigneur.",
+    "voirAussi": [
+      "or"
+    ]
+  },
+  {
+    "id": "competences",
+    "titre": "Les compétences",
+    "texte": "Six compétences, de 0 à 30 environ. Diplomatie : relations et négociations. Guerre : commandement des armées. Gestion : revenus et administration. Intrigue : complots et espionnage. Savoir : religion, médecine, culture. Vaillance : combat personnel. Touchez une valeur pour voir d'où elle vient.",
+    "voirAussi": [
+      "traits"
+    ]
+  },
+  {
+    "id": "comp-dip",
+    "titre": "Diplomatie",
+    "texte": "Aide à se faire des alliés, à négocier, à obtenir de bons mariages. Un bon diplomate est apprécié de ses vassaux.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "comp-gue",
+    "titre": "Guerre",
+    "texte": "Talent de chef d'armée : organisation, stratégie, choix du terrain. Elle comptera beaucoup lors des batailles.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "comp-ges",
+    "titre": "Gestion",
+    "texte": "Art d'administrer ses terres : impôts, développement, constructions.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "comp-int",
+    "titre": "Intrigue",
+    "texte": "Capacité à comploter, à espionner et à déjouer les complots des autres.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "comp-sav",
+    "titre": "Savoir",
+    "texte": "Instruction, connaissance de la religion et de la médecine.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "comp-val",
+    "titre": "Vaillance",
+    "texte": "Force et habileté au combat personnel. Un seigneur vaillant survit mieux aux batailles et aux duels.",
+    "voirAussi": [
+      "competences"
+    ]
+  },
+  {
+    "id": "traits",
+    "titre": "Les traits de caractère",
+    "texte": "Chaque adulte a trois traits de personnalité (ambitieux, loyal, cruel…), qui changent ses compétences, ses relations et ses décisions. Certains traits sont innés et héréditaires (robuste, génie…). L'éducation reçue à 16 ans ajoute un trait. Des traits opposés (pieux et cynique) créent de l'antipathie.",
+    "voirAussi": [
+      "opinion",
+      "competences"
+    ]
+  },
+  {
+    "id": "opinion",
+    "titre": "L'opinion",
+    "texte": "Ce qu'un personnage pense d'un autre, de −100 à +100. Elle dépend des caractères, de la famille, des liens féodaux, des amitiés, des cadeaux et des souvenirs. Touchez une opinion pour voir chaque raison. Elle décide si l'on accepte vos propositions.",
+    "voirAussi": [
+      "traits",
+      "memoire"
+    ]
+  },
+  {
+    "id": "sante",
+    "titre": "La santé",
+    "texte": "Une santé de 5 est normale. Plus elle est basse, plus le risque de mourir chaque mois augmente. La maladie et la vieillesse la font baisser ; être robuste l'améliore.",
+    "voirAussi": []
+  },
+  {
+    "id": "or",
+    "titre": "L'or",
+    "texte": "Les revenus viennent de vos comtés et des impôts de vos vassaux. Vous payez l'entretien de votre cour et, si vous êtes vassal, un impôt à votre suzerain. Touchez le budget pour voir le détail.",
+    "voirAussi": [
+      "developpement",
+      "vassal"
+    ]
+  },
+  {
+    "id": "prestige",
+    "titre": "Le prestige",
+    "texte": "La renommée personnelle. Il augmente avec les titres tenus. Il servira à revendiquer des terres et à imposer des décisions.",
+    "voirAussi": []
+  },
+  {
+    "id": "piete",
+    "titre": "La piété",
+    "texte": "La réputation religieuse. Elle augmente avec la dévotion. Elle comptera pour obtenir l'appui de l'Église.",
+    "voirAussi": []
+  },
+  {
+    "id": "ambition",
+    "titre": "L'ambition",
+    "texte": "Le but que poursuit un personnage pendant des années : accroître sa puissance, s'enrichir, vivre pieusement, se faire des amis ou fonder une grande famille. Elle oriente ses décisions.",
+    "voirAussi": [
+      "ia"
+    ]
+  },
+  {
+    "id": "vassal",
+    "titre": "Vassaux et suzerains",
+    "texte": "Un vassal tient ses terres d'un seigneur plus puissant, son suzerain, à qui il doit impôt et service. Les vassaux ont leurs propres ambitions : un vassal mécontent peut devenir dangereux.",
+    "voirAussi": [
+      "opinion"
+    ]
+  },
+  {
+    "id": "heritier",
+    "titre": "L'héritier",
+    "texte": "Celui qui recevra le titre principal à la mort du seigneur. C'est le personnage que vous incarnerez ensuite. Pensez à le marier tôt pour assurer la lignée.",
+    "voirAussi": [
+      "succession-partage",
+      "succession-primo"
+    ]
+  },
+  {
+    "id": "succession-partage",
+    "titre": "Le partage",
+    "texte": "Loi de succession courante en 1066 : à la mort du seigneur, ses terres sont réparties entre ses fils. L'aîné reçoit le titre principal et sa capitale ; les cadets deviennent ses vassaux. Le domaine se fragmente à chaque génération.",
+    "voirAussi": [
+      "succession-primo",
+      "heritier"
+    ]
+  },
+  {
+    "id": "succession-primo",
+    "titre": "La primogéniture",
+    "texte": "Loi de succession : l'aîné hérite de tout. Le domaine reste uni, mais les cadets, écartés, peuvent en garder rancune. Les fils passent avant les filles ; les enfants d'un aîné mort passent avant ses frères.",
+    "voirAussi": [
+      "succession-partage",
+      "heritier"
+    ]
+  },
+  {
+    "id": "dynastie",
+    "titre": "La dynastie",
+    "texte": "Votre famille, avec ses branches (maisons). Votre but véritable est de la faire durer et prospérer à travers les siècles.",
+    "voirAussi": [
+      "personnage-joueur"
+    ]
+  },
+  {
+    "id": "relations",
+    "titre": "Amis et rivaux",
+    "texte": "Les personnes qui se côtoient peuvent devenir amies (+40 d'opinion) ou rivales (−50) selon leurs caractères et leurs opinions.",
+    "voirAussi": [
+      "opinion"
+    ]
+  },
+  {
+    "id": "memoire",
+    "titre": "Les souvenirs",
+    "texte": "Les personnages retiennent les événements importants : naissances, mariages, deuils, cadeaux, héritages refusés. Certains souvenirs changent durablement leur opinion des autres.",
+    "voirAussi": [
+      "opinion"
+    ]
+  },
+  {
+    "id": "chronique",
+    "titre": "La chronique",
+    "texte": "Le récit automatique de votre partie : naissances, mariages, morts et successions des familles importantes. Touchez une ligne pour ouvrir la fiche du personnage.",
+    "voirAussi": []
+  },
+  {
+    "id": "hors-scene",
+    "titre": "Personnage hors scène",
+    "texte": "Pour que le jeu reste fluide, les personnes sans lien proche avec une famille seigneuriale cessent d'être suivies en détail. Elles ne sont pas mortes : elles vivent leur vie loin des cours.",
+    "voirAussi": []
+  },
+  {
+    "id": "clerc",
+    "titre": "Les vœux religieux",
+    "texte": "Un personnage entré dans les ordres ne se marie pas et n'hérite pas. C'était le sort fréquent des cadets sans terre.",
+    "voirAussi": []
+  },
+  {
+    "id": "ia",
+    "titre": "L'intelligence des personnages",
+    "texte": "Chaque personnage réfléchit environ une fois par mois. Il note ses options (se marier, marier ses enfants, offrir un cadeau, entrer dans les ordres…) selon son caractère, ses ambitions et sa situation, puis choisit parmi les meilleures. Le mode développeur montre ces notes et leurs raisons.",
+    "voirAussi": [
+      "ambition"
+    ]
   }
 ]

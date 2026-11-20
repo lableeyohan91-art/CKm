@@ -4,7 +4,7 @@ Jeu de grande stratégie médiévale pour mobile, centré sur les personnages et
 les dynasties. Projet original : aucun graphisme, texte ou code repris d'un
 jeu existant.
 
-État : phase 0 terminée (fondations techniques). Phase 1 en cours.
+État : phase 1 terminée — prototype jouable du « monde vivant » (v0.1.0). Prochaine étape : la guerre.
 
 ## Documents de référence
 
@@ -22,5 +22,6 @@ cd app
 npm install
 npm run dev        # ouvre le jeu sur http://localhost:5173
 npm test           # tests automatiques
+npm run sim        # simulation de 300 ans avec statistiques (GRAINE=… ANS=…)
 npm run build      # version de production dans app/dist
 ```

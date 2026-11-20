@@ -13,12 +13,14 @@
     "sim": "OUTILS=1 vitest run"
   },
   "dependencies": {
+    "d3-delaunay": "^6.0.4",
     "idb": "8.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "zod": "3.24.1"
   },
   "devDependencies": {
+    "@types/d3-delaunay": "^6.0.4",
     "@types/node": "22.10.5",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",

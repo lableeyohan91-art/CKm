@@ -32,7 +32,7 @@ mémoire, IA, économie, sauvegarde**. C'est exactement le prototype demandé.
 - **Fin** : un monde vide avance de 500 ans sans erreur ; sauvegarder/recharger
   donne le même résultat ; tests verts.
 
-## Phase 1 — Prototype « monde vivant » (le cœur)
+## Phase 1 — Prototype « monde vivant » (le cœur) — ✅ terminée (v0.1.0)
 Contenu : 30 comtés (France élargie, 1066), ~100 personnages, 8 à 12 dynasties.
 - Personnages : compétences, traits, santé, vieillissement, mort.
 - Famille : mariages, fiançailles, grossesses, naissances, bâtards, génétique
@@ -55,6 +55,13 @@ Contenu : 30 comtés (France élargie, 1066), ~100 personnages, 8 à 12 dynastie
   mariage impossible, population stable, dynasties qui naissent et meurent) ;
   tests de succession, de parenté, d'économie et de sauvegarde verts ; fluide
   sur téléphone.
+
+### Reste à faire, reporté de la phase 1
+- Propositions de mariage faites **au** joueur et **par** le joueur (interface
+  de choix) : la simulation les gère déjà pour l'IA.
+- Conseil (5 postes) et conseiller qui guide le joueur.
+- Performances : mesurer sur un vrai téléphone (≈ 75 ms par année simulée
+  sur serveur avec 700 personnages).
 
 ## Phase 2 — Guerre (cœur demandé)
 Motifs de guerre, levées, compagnies, chevaliers, mercenaires ; déplacement au
