@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## [0.2.0] — Carte réelle et direction artistique
+
+### Ajouté
+- Carte d'après **Natural Earth** (domaine public) : côtes et fleuves réels,
+  comtés découpés par l'outil `outils/carte/generer_geometrie.py` ; les
+  voisinages des déplacements suivent les frontières dessinées (test).
+- **Charte graphique** (`ART_DIRECTION.md`) et **liste des images** avec leurs
+  prompts pour ChatGPT (`ASSETS_TODO.md`, générée depuis le catalogue).
+- **Portraits par calques** : choix déterministe des calques (âge, sexe, rôle,
+  rang, mariage, marques), recoloration des cheveux, des étoffes (couleur de la
+  maison) et du teint ; portrait dessiné de secours tant qu'une pièce manque.
+- **Intégration automatique** des images déposées dans `assets/` (`npm run art`) :
+  vérification des noms, proportions et transparence, recalage, réglages
+  manuels, WebP en deux tailles, manifeste ; gabarit d'alignement.
+
+### Modifié
+- Couleurs de carte distinctes par dynastie et par fief.
+
 ## [0.1.0] — Phase 1 : monde vivant (prototype jouable)
 
 ### Ajouté

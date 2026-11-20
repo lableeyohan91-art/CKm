@@ -11,9 +11,25 @@ import type { Partie } from './game';
 
 /** Vues sérialisables envoyées à l'interface. Aucune règle ici : uniquement de la mise en forme. */
 
+/** Ce qu'il faut pour composer un portrait par calques (voir ART_DIRECTION.md). */
+export interface Apparence {
+  graine: number; sexe: 'h' | 'f'; age: number; rang: number; culture: string; clerc: boolean; marie: boolean;
+  role: 'enfant' | 'clerc' | 'roi' | 'chevalier' | 'noble'; maison: string | null; marques: string[]; titre: boolean;
+}
 export interface PersoResume {
   id: number; nom: string; age: number; sexe: 'h' | 'f'; vivant: boolean; titre?: string; portrait: number;
-  rang: number; maison?: string; joueur: boolean; enfant: boolean; mort?: string;
+  rang: number; maison?: string; joueur: boolean; enfant: boolean; mort?: string; app: Apparence;
+}
+
+export function apparence(w: World, c: Character): Apparence {
+  const a = age(w, c), rang = rangMax(w, c);
+  const role: Apparence['role'] = a < 16 ? 'enfant' : c.clerc ? 'clerc' : rang >= 3 ? 'roi'
+    : c.sexe === 'h' && !c.titres.length && c.competences.gue >= 12 ? 'chevalier' : 'noble';
+  return {
+    graine: c.portrait, sexe: c.sexe, age: a, rang, culture: c.cultureId, clerc: !!c.clerc,
+    marie: c.conjointId !== undefined || c.anciensConjoints.length > 0, role, maison: c.maisonId, titre: c.titres.length > 0,
+    marques: [...(c.malade ? ['malade'] : [])],
+  };
 }
 export interface ComteVue {
   id: string; nom: string; titulaire?: PersoResume; grandFief?: { id: number; nom: string }; souverain?: { id: number; nom: string };
@@ -34,14 +50,14 @@ export interface Fiche {
   budget?: Valeur; heritier?: PersoResume; partage?: { titre: string; heritier: PersoResume }[];
   opinionDuJoueur?: Valeur; opinionEnversJoueur?: Valeur; vassaux: PersoResume[];
 }
-export interface Jouable { id: number; nom: string; titre: string; age: number; difficulte: 'Facile' | 'Moyenne' | 'Difficile'; description: string; portrait: number; sexe: 'h' | 'f' }
+export interface Jouable { id: number; nom: string; titre: string; age: number; difficulte: 'Facile' | 'Moyenne' | 'Difficile'; description: string; portrait: number; sexe: 'h' | 'f'; app: Apparence }
 export interface Noeud { p: PersoResume; batard: boolean; conjoint?: PersoResume; enfants: Noeud[] }
 
 export function resume(w: World, c: Character): PersoResume {
   const t = titrePrincipal(w, c);
   return {
     id: c.id, nom: nomComplet(w, c), age: age(w, c), sexe: c.sexe, vivant: vivant(c), portrait: c.portrait, rang: rangMax(w, c),
-    joueur: w.joueurId === c.id, enfant: age(w, c) < 16,
+    joueur: w.joueurId === c.id, enfant: age(w, c) < 16, app: apparence(w, c),
     ...(t ? { titre: w.titres[t]!.nom } : {}), ...(c.maisonId ? { maison: w.maisons[c.maisonId]?.nom } : {}),
     ...(c.deces !== undefined ? { mort: formatDate(c.deces) } : c.horsScene !== undefined ? { mort: 'a quitté la scène' } : {}),
   };
@@ -125,7 +141,7 @@ export function vueJouables(p: Partie): Jouable[] {
       const sz = perso(w, c.suzerainId);
       const mineur = age(w, c) < 16 ? ' Encore mineur : son royaume est convoité.' : '';
       const description = `${w.titres[t]!.nom}, ${n} comté${n > 1 ? 's' : ''}${sz ? `, vassal de ${nomComplet(w, sz)}` : ', souverain indépendant'}.${mineur}`;
-      return { id: c.id, nom: nomComplet(w, c), titre: w.titres[t]!.nom, age: age(w, c), difficulte, description, portrait: c.portrait, sexe: c.sexe };
+      return { id: c.id, nom: nomComplet(w, c), titre: w.titres[t]!.nom, age: age(w, c), difficulte, description, portrait: c.portrait, sexe: c.sexe, app: apparence(w, c) };
     });
 }
 

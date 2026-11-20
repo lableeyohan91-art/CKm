@@ -6,7 +6,7 @@ import { Portrait } from './Portrait';
 export function PersoLien({ p, onOpen, detail }: { p: PersoResume; onOpen: (id: number) => void; detail?: ReactNode }) {
   return (
     <button className="perso" onClick={() => onOpen(p.id)}>
-      <Portrait graine={p.portrait} sexe={p.sexe} age={p.age} rang={p.rang} taille={40} mort={!p.vivant} />
+      <Portrait graine={p.portrait} sexe={p.sexe} age={p.age} rang={p.rang} taille={40} mort={!p.vivant} app={p.app} />
       <span className="perso-txt">
         <b>{p.nom}{p.joueur && <span className="tag">vous</span>}</b>
         <span className="muted">{p.vivant ? `${p.age} ans` : `† ${p.mort}`}{p.titre ? ` · ${p.titre}` : ''}{detail ? <> · {detail}</> : null}</span>

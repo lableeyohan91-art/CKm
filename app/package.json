@@ -10,7 +10,12 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sim": "OUTILS=1 vitest run"
+    "sim": "OUTILS=1 vitest run",
+    "art": "node tools/art/integrer.mjs",
+    "art:todo": "node tools/art/todo.mjs",
+    "art:gabarit": "node tools/art/gabarit.mjs",
+    "predev": "node tools/art/integrer.mjs",
+    "prebuild": "node tools/art/integrer.mjs"
   },
   "dependencies": {
     "idb": "8.0.1",
@@ -24,6 +29,7 @@
     "@types/react-dom": "18.3.5",
     "@vitejs/plugin-react": "4.3.4",
     "fake-indexeddb": "6.0.0",
+    "sharp": "^0.33.5",
     "typescript": "5.7.3",
     "vite": "6.0.7",
     "vitest": "^3.0.5"

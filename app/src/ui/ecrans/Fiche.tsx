@@ -20,7 +20,7 @@ export function Fiche({ client, id, jour, onPerso }: { client: SimClient; id: nu
   return (
     <div className="fiche">
       <section className="panel entete">
-        <Portrait graine={r.portrait} sexe={r.sexe} age={r.age} rang={r.rang} taille={88} mort={!r.vivant} />
+        <Portrait graine={r.portrait} sexe={r.sexe} age={r.age} rang={r.rang} taille={88} mort={!r.vivant} app={r.app} />
         <div>
           <h1>{f.nomComplet}{r.joueur && <span className="tag">vous</span>}</h1>
           <p className="muted">{r.vivant ? `${r.age} ans, né${r.sexe === 'f' ? 'e' : ''} le ${f.naissance}` : `${f.naissance} – ${f.deces ?? '?'}${f.cause ? ` (${f.cause})` : ''}`}

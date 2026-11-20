@@ -1,14 +1,76 @@
+import { useEffect, useRef, useState } from 'react';
+import type { Apparence } from '../../worker/vues';
+import { chargerManifeste, choisirCalques, manifesteCharge, surManifeste, type Calque } from '../art/calques';
+
 /**
- * Portrait généré : visage, cheveux, barbe, coiffe selon le sexe, l'âge et le rang.
- * Entièrement déterministe à partir de la graine du personnage (aucune image externe).
+ * Portrait d'un personnage.
+ * - Si des calques illustrés existent (dossier assets/ intégré), il est composé par superposition
+ *   et recoloration (cheveux, étoffes aux couleurs de la maison, teint).
+ * - Sinon, portrait dessiné de secours, entièrement déterministe.
  */
 const PEAUX = ['#f1d3b8', '#e8c39e', '#dcb08a', '#c99a72', '#f5ddc8'];
 const CHEVEUX = ['#2b1d14', '#4a3020', '#6b4423', '#8a5a2b', '#b07a3a', '#d6b06a', '#a0391e'];
 const FONDS = ['#7b2d26', '#2f4f6f', '#3e5b3a', '#6d4b7a', '#8a6a1f', '#4a4a4a'];
-
 function rand(seed: number) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
 
-export function Portrait({ graine, sexe, age, rang, taille = 56, mort = false }: { graine: number; sexe: 'h' | 'f'; age: number; rang: number; taille?: number; mort?: boolean }) {
+const images = new Map<string, Promise<HTMLImageElement>>();
+function image(src: string): Promise<HTMLImageElement> {
+  let p = images.get(src);
+  if (!p) {
+    p = new Promise((ok, ko) => { const i = new Image(); i.decoding = 'async'; i.onload = () => ok(i); i.onerror = ko; i.src = new URL(src, document.baseURI).href; });
+    images.set(src, p);
+  }
+  return p;
+}
+
+/** Dessine un calque recoloré (multiplication) en conservant sa transparence. */
+function teinter(img: HTMLImageElement, couleur: string, force: number): HTMLCanvasElement {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d')!;
+  g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = 'multiply'; g.globalAlpha = force; g.fillStyle = couleur; g.fillRect(0, 0, c.width, c.height);
+  g.globalAlpha = 1; g.globalCompositeOperation = 'destination-in'; g.drawImage(img, 0, 0);
+  return c;
+}
+
+function PortraitCalques({ calques, taille, mort }: { calques: Calque[]; taille: number; mort: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    let annule = false;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const px = Math.round(taille * dpr);
+    const res = px > 200 ? '512' : '256';
+    Promise.all(calques.map((c) => image(c.src[res] ?? Object.values(c.src)[0]!))).then((imgs) => {
+      const cv = ref.current; if (!cv || annule) return;
+      cv.width = px; cv.height = px;
+      const g = cv.getContext('2d')!;
+      g.clearRect(0, 0, px, px);
+      imgs.forEach((img, i) => {
+        const c = calques[i]!;
+        const src = c.teinte ? teinter(img, c.teinte, c.force) : img;
+        // cadrage carré du gabarit : x 192→832, y 260→900 sur une toile 1024×1536
+        const k = img.naturalWidth / 1024;
+        g.drawImage(src, 192 * k, 260 * k, 640 * k, 640 * k, 0, 0, px, px);
+      });
+    }).catch(() => {});
+    return () => { annule = true; };
+  }, [calques, taille]);
+  return <canvas ref={ref} width={taille} height={taille} role="img" aria-hidden="true"
+    style={{ width: taille, height: taille, borderRadius: 10, flex: 'none', filter: mort ? 'grayscale(1)' : undefined }} />;
+}
+
+function useManifeste() {
+  const [m, setM] = useState(manifesteCharge());
+  useEffect(() => { void chargerManifeste(); return surManifeste(() => setM(manifesteCharge())); }, []);
+  return m;
+}
+
+export function Portrait({ graine, sexe, age, rang, taille = 56, mort = false, app }:
+  { graine: number; sexe: 'h' | 'f'; age: number; rang: number; taille?: number; mort?: boolean; app?: Apparence }) {
+  const m = useManifeste();
+  const calques = m && app ? choisirCalques(app, m) : null;
+  if (calques) return <PortraitCalques calques={calques} taille={taille} mort={mort} />;
+
   const r = rand(graine);
   const peau = PEAUX[Math.floor(r() * PEAUX.length)]!;
   let cheveux = CHEVEUX[Math.floor(r() * CHEVEUX.length)]!;

@@ -12,6 +12,8 @@ jeu existant.
 - [ARCHITECTURE.md](ARCHITECTURE.md) : organisation technique et modèle de données
 - [ROADMAP.md](ROADMAP.md) : feuille de route par phases
 - [CHANGELOG.md](CHANGELOG.md) : journal des modifications
+- [ART_DIRECTION.md](ART_DIRECTION.md) : charte graphique et système de portraits par calques
+- [ASSETS_TODO.md](ASSETS_TODO.md) : images à produire avec ChatGPT (prompts)
 - [recherche/](recherche/) : recherche préalable (mécaniques du genre,
   données historiques, départ en 1066)
 
@@ -23,5 +25,7 @@ npm install
 npm run dev        # ouvre le jeu sur http://localhost:5173
 npm test           # tests automatiques
 npm run sim        # simulation de 300 ans avec statistiques (GRAINE=… ANS=…)
+npm run art        # intègre les images déposées dans assets/
+npm run art:todo   # régénère ASSETS_TODO.md depuis le catalogue
 npm run build      # version de production dans app/dist
 ```

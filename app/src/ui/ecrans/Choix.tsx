@@ -17,7 +17,7 @@ export function Choix({ client, onApercu }: { client: SimClient; onApercu: (id: 
       <div className="jouables">
         {liste.map((j) => (
           <div key={j.id} className="jouable panel">
-            <Portrait graine={j.portrait} sexe={j.sexe} age={j.age} rang={j.titre.startsWith('Royaume') ? 3 : j.titre.startsWith('Duché') ? 2 : 1} taille={64} />
+            <Portrait graine={j.portrait} sexe={j.sexe} age={j.age} rang={j.titre.startsWith('Royaume') ? 3 : j.titre.startsWith('Duché') ? 2 : 1} taille={64} app={j.app} />
             <div className="jtxt">
               <b>{j.nom}</b>
               <span className="muted">{j.age} ans · difficulté {j.difficulte.toLowerCase()}</span>

@@ -12,7 +12,7 @@ function Branche({ n, onPerso }: { n: Noeud; onPerso: (id: number) => void }) {
       <div className={`noeud${p.vivant ? '' : ' mort'}${p.joueur ? ' joueur' : ''}`}>
         {n.enfants.length > 0 && <button className="pli" aria-label={ouvert ? 'Replier' : 'Déplier'} aria-expanded={ouvert} onClick={() => setOuvert(!ouvert)}>{ouvert ? '−' : '+'}</button>}
         <button className="noeud-btn" onClick={() => onPerso(p.id)}>
-          <Portrait graine={p.portrait} sexe={p.sexe} age={p.age} rang={p.rang} taille={32} mort={!p.vivant} />
+          <Portrait graine={p.portrait} sexe={p.sexe} age={p.age} rang={p.rang} taille={32} mort={!p.vivant} app={p.app} />
           <span><b>{p.nom}</b>{n.batard && <span className="tag">bâtard</span>}{p.joueur && <span className="tag">vous</span>}<br />
             <span className="muted">{p.vivant ? `${p.age} ans` : `† ${p.mort}`}{p.titre ? ` · ${p.titre}` : ''}{n.conjoint ? ` · ⚭ ${n.conjoint.nom}` : ''}</span></span>
         </button>
