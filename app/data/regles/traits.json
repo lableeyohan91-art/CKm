@@ -1,0 +1,44 @@
+{
+  "axes": ["ambition", "loyaute", "audace", "compassion", "cupidite", "sociabilite", "raison", "piete", "rancune", "energie"],
+  "personnalite": [
+    { "id": "ambitieux", "nom": "Ambitieux", "oppose": "satisfait", "competences": { "dip": 1, "ges": 1, "gue": 1 }, "axes": { "ambition": 2, "energie": 1 }, "description": "Veut toujours plus : terres, titres, influence." },
+    { "id": "satisfait", "nom": "Satisfait", "oppose": "ambitieux", "competences": {}, "axes": { "ambition": -2 }, "description": "Se contente de ce qu'il a. Rarement une menace." },
+    { "id": "loyal", "nom": "Loyal", "oppose": "fourbe", "competences": {}, "axes": { "loyaute": 2 }, "description": "Tient sa parole et ses serments, même quand ils lui coûtent." },
+    { "id": "fourbe", "nom": "Fourbe", "oppose": "loyal", "competences": { "int": 2 }, "axes": { "loyaute": -2 }, "description": "Ment et trahit sans état d'âme quand cela l'arrange." },
+    { "id": "courageux", "nom": "Courageux", "oppose": "lache", "competences": { "val": 2, "gue": 1 }, "axes": { "audace": 2 }, "description": "N'a pas peur du risque ni du combat." },
+    { "id": "lache", "nom": "Lâche", "oppose": "courageux", "competences": { "int": 1, "val": -2 }, "axes": { "audace": -2 }, "description": "Fuit le danger et préfère les chemins détournés." },
+    { "id": "cruel", "nom": "Cruel", "oppose": "compatissant", "competences": { "int": 1, "gue": 1 }, "axes": { "compassion": -2 }, "description": "La souffrance des autres le laisse froid, ou l'amuse." },
+    { "id": "compatissant", "nom": "Compatissant", "oppose": "cruel", "competences": { "dip": 1 }, "axes": { "compassion": 2 }, "description": "Souffre de voir souffrir. Pardonne volontiers." },
+    { "id": "genereux", "nom": "Généreux", "oppose": "cupide", "competences": { "dip": 2 }, "axes": { "cupidite": -2 }, "description": "Donne sans compter, ce qui lui vaut des amis." },
+    { "id": "cupide", "nom": "Cupide", "oppose": "genereux", "competences": { "ges": 1 }, "axes": { "cupidite": 2 }, "description": "Aime l'or plus que tout et déteste dépenser." },
+    { "id": "jaloux", "nom": "Jaloux", "oppose": null, "competences": {}, "axes": { "rancune": 1, "ambition": 1 }, "description": "Supporte mal que d'autres aient plus que lui." },
+    { "id": "calculateur", "nom": "Calculateur", "oppose": "impulsif", "competences": { "int": 1, "ges": 1 }, "axes": { "raison": 2 }, "description": "Pèse chaque décision et anticipe les conséquences." },
+    { "id": "impulsif", "nom": "Impulsif", "oppose": "calculateur", "competences": {}, "axes": { "raison": -2, "audace": 1 }, "description": "Agit d'abord, réfléchit ensuite." },
+    { "id": "timide", "nom": "Timide", "oppose": "sociable", "competences": { "dip": -1, "sav": 1 }, "axes": { "sociabilite": -2 }, "description": "Mal à l'aise en compagnie, préfère les livres au festin." },
+    { "id": "sociable", "nom": "Sociable", "oppose": "timide", "competences": { "dip": 2 }, "axes": { "sociabilite": 2 }, "description": "Aime la compagnie et se fait facilement des amis." },
+    { "id": "pieux", "nom": "Pieux", "oppose": "cynique", "competences": { "sav": 1 }, "axes": { "piete": 2 }, "description": "Sa foi guide ses actes. L'Église l'apprécie." },
+    { "id": "cynique", "nom": "Cynique", "oppose": "pieux", "competences": { "int": 1 }, "axes": { "piete": -2 }, "description": "Ne croit qu'à ce qu'il voit, et pas toujours." },
+    { "id": "colerique", "nom": "Colérique", "oppose": "calme", "competences": { "val": 1, "dip": -1 }, "axes": { "rancune": 1, "raison": -1 }, "description": "S'emporte vite et frappe parfois avant de parler." },
+    { "id": "calme", "nom": "Calme", "oppose": "colerique", "competences": { "ges": 1 }, "axes": { "raison": 1, "rancune": -1 }, "description": "Garde son sang-froid en toute circonstance." },
+    { "id": "rancunier", "nom": "Rancunier", "oppose": "clement", "competences": {}, "axes": { "rancune": 2 }, "description": "N'oublie jamais une offense, et la transmet à ses enfants." },
+    { "id": "clement", "nom": "Clément", "oppose": "rancunier", "competences": { "dip": 1 }, "axes": { "rancune": -2, "compassion": 1 }, "description": "Pardonne les offenses et accorde des secondes chances." },
+    { "id": "travailleur", "nom": "Travailleur", "oppose": "paresseux", "competences": { "ges": 2 }, "axes": { "energie": 2 }, "description": "Infatigable, s'occupe de tout lui-même." },
+    { "id": "paresseux", "nom": "Paresseux", "oppose": "travailleur", "competences": { "ges": -1 }, "axes": { "energie": -2 }, "description": "Remet tout au lendemain." }
+  ],
+  "innes": [
+    { "id": "robuste", "nom": "Robuste", "competences": { "val": 1 }, "sante": 1.5, "fertilite": 0.1, "transmission": 0.3, "description": "Rarement malade, vit souvent vieux." },
+    { "id": "chetif", "nom": "Chétif", "competences": { "val": -2 }, "sante": -1.5, "fertilite": -0.1, "transmission": 0.25, "description": "Fragile de santé depuis l'enfance." },
+    { "id": "beau", "nom": "Beau", "competences": { "dip": 1 }, "sante": 0, "fertilite": 0.05, "transmission": 0.3, "description": "Attire les regards. Facilite les mariages." },
+    { "id": "laid", "nom": "Laid", "competences": { "dip": -1 }, "sante": 0, "fertilite": -0.05, "transmission": 0.3, "description": "Physique ingrat, qui ne facilite pas les mariages." },
+    { "id": "genie", "nom": "Génie", "competences": { "dip": 3, "gue": 3, "ges": 3, "int": 3, "sav": 3 }, "sante": 0, "fertilite": 0, "transmission": 0.15, "description": "Intelligence hors du commun." },
+    { "id": "lent", "nom": "Lent d'esprit", "competences": { "dip": -3, "gue": -3, "ges": -3, "int": -3, "sav": -3 }, "sante": 0, "fertilite": 0, "transmission": 0.15, "description": "Comprend lentement. Peut devenir un héritier faible." },
+    { "id": "geant", "nom": "Géant", "competences": { "val": 4 }, "sante": -0.5, "fertilite": 0, "transmission": 0.2, "description": "Taille et force impressionnantes." }
+  ],
+  "education": [
+    { "id": "diplomate", "nom": "Éducation diplomatique", "competence": "dip" },
+    { "id": "stratege", "nom": "Éducation militaire", "competence": "gue" },
+    { "id": "administrateur", "nom": "Éducation d'intendant", "competence": "ges" },
+    { "id": "intrigant", "nom": "Éducation d'intrigant", "competence": "int" },
+    { "id": "erudit", "nom": "Éducation savante", "competence": "sav" }
+  ]
+}

@@ -1,5 +1,6 @@
 import type { Day } from '../engine/calendar';
 import type { RngState } from '../engine/rng';
+import type { Character, County, Dynasty, House, Notification, Relation, Title } from './entities';
 
 /** Élément de la file datée : un traitement à exécuter à une date précise. */
 export interface ScheduledItem {
@@ -35,7 +36,20 @@ export interface World {
   queue: ScheduledItem[];
   chronicle: ChronicleEntry[];
   flags: Record<string, string | number | boolean>;
-  stats: { daysSimulated: number };
+  stats: { daysSimulated: number; naissances: number; deces: number; mariages: number; successions: number };
+
+  // --- Phase 1 : monde vivant ---
+  personnages: Record<number, Character>;
+  vivants: number[];                      // identifiants des vivants, ordre croissant
+  dynasties: Record<string, Dynasty>;
+  maisons: Record<string, House>;
+  titres: Record<string, Title>;
+  comtes: Record<string, County>;
+  relations: Relation[];
+  joueurId: number | null;                // null : mode observateur
+  finDePartie?: string;
+  notifications: Notification[];
 }
 
-export const WORLD_SCHEMA_VERSION = 1;
+/** v1 : version d'essai 0.0.1 (monde vide). v2 : monde vivant (phase 1). */
+export const WORLD_SCHEMA_VERSION = 2;

@@ -17,7 +17,9 @@ export interface SaveFile {
 export type Migration = (world: Record<string, unknown>) => Record<string, unknown>;
 
 /** Clé = version de départ. MIGRATIONS[1] transforme une sauvegarde v1 en v2. */
-export const MIGRATIONS: Record<number, Migration> = {};
+export const MIGRATIONS: Record<number, Migration> = {
+  1: () => { throw new SaveError("Sauvegarde de la version d'essai 0.0.1 (monde vide) : elle ne peut pas être reprise. Commencez une nouvelle partie."); },
+};
 
 export class SaveError extends Error {}
 
@@ -33,7 +35,8 @@ export function migrate(raw: unknown, migrations: Record<number, Migration> = MI
   while (v < target) {
     const m = migrations[v];
     if (!m) throw new SaveError(`Aucune migration depuis la version ${v}.`);
-    world = m(world); v++;
+    try { world = m(world); } catch (e) { throw e instanceof SaveError ? e : new SaveError(`Migration v${v} impossible : ${String(e)}`); }
+    v++;
     world.schemaVersion = v;
   }
   return { ...save, schemaVersion: v, world: world as unknown as World };

@@ -56,8 +56,8 @@ self.onmessage = async (e: MessageEvent<ToWorker>) => {
   const m = e.data;
   try {
     switch (m.type) {
-      case 'nouvelle': sim = newGame(m.seed, data); paused = true; break;
-      case 'charger': sim = await loadGame(m.bytes); paused = true; break;
+      case 'nouvelle': sim = newGame(m.seed, data).sim; paused = true; break;
+      case 'charger': sim = (await loadGame(m.bytes, data)).sim; paused = true; break;
       case 'pause': paused = m.paused; break;
       case 'vitesse': speed = m.speed; break;
       case 'avancer': runDays(m.days); break;

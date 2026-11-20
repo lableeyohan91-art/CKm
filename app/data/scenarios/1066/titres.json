@@ -1,0 +1,20 @@
+{
+  "royaumes": [
+    { "id": "k-france", "nom": "Royaume de France", "succession": "primogeniture", "duches": ["d-france", "d-normandie", "d-bretagne", "d-anjou", "d-champagne", "d-flandre", "d-bourgogne", "d-aquitaine", "d-toulouse"] },
+    { "id": "k-angleterre", "nom": "Royaume d'Angleterre", "succession": "primogeniture", "duches": ["d-wessex", "d-kent"] }
+  ],
+  "duches": [
+    { "id": "d-france", "nom": "Duché de France", "succession": "primogeniture", "comtes": ["paris", "orleans"] },
+    { "id": "d-normandie", "nom": "Duché de Normandie", "succession": "partage", "comtes": ["rouen", "bayeux", "evreux", "coutances"] },
+    { "id": "d-bretagne", "nom": "Duché de Bretagne", "succession": "partage", "comtes": ["rennes", "nantes", "quimper"] },
+    { "id": "d-anjou", "nom": "Duché d'Anjou", "succession": "partage", "comtes": ["angers", "tours", "le-mans"] },
+    { "id": "d-champagne", "nom": "Duché de Champagne", "succession": "partage", "comtes": ["troyes", "meaux", "blois", "chartres"] },
+    { "id": "d-flandre", "nom": "Duché de Flandre", "succession": "partage", "comtes": ["bruges", "arras", "boulogne", "saint-quentin"] },
+    { "id": "d-bourgogne", "nom": "Duché de Bourgogne", "succession": "partage", "comtes": ["dijon", "autun"] },
+    { "id": "d-aquitaine", "nom": "Duché d'Aquitaine", "succession": "partage", "comtes": ["poitiers", "limoges", "bordeaux"] },
+    { "id": "d-toulouse", "nom": "Duché de Toulouse", "succession": "partage", "comtes": ["toulouse"] },
+    { "id": "d-wessex", "nom": "Comté de Wessex", "succession": "partage", "comtes": ["winchester", "exeter"] },
+    { "id": "d-kent", "nom": "Comté de Kent et d'Essex", "succession": "partage", "comtes": ["canterbury", "londres"] }
+  ],
+  "successionComtes": "partage"
+}

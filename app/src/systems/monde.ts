@@ -1,0 +1,196 @@
+import { addYears, type Day } from '../engine/calendar';
+import type { SimContext } from '../engine/sim';
+import { SKILLS, type Character, type MemoryKind, type Sex, type Skills } from '../model/entities';
+import type { World } from '../model/world';
+import { nomComplet, perso, titrePrincipal, vivant } from '../rules/personnage';
+import type { Regles } from '../rules/regles';
+import { planSuccession } from '../rules/succession';
+
+/**
+ * Opérations qui modifient le monde. Le joueur et l'IA passent par ces mêmes
+ * fonctions : mêmes règles pour tous, et un seul endroit à tester.
+ */
+
+export function notifier(w: World, texte: string, important: boolean, persos: number[] = []): void {
+  w.notifications.push({ jour: w.day, texte, important, persos });
+  if (w.notifications.length > 300) w.notifications.splice(0, w.notifications.length - 300);
+}
+
+/** Le joueur est-il concerné (lui, sa famille proche, ses vassaux directs) ? */
+export function concerneJoueur(w: World, ids: number[]): boolean {
+  const j = perso(w, w.joueurId ?? undefined); if (!j) return false;
+  return ids.some((id) => {
+    const c = w.personnages[id]; if (!c) return false;
+    return c.id === j.id || c.conjointId === j.id || c.pereId === j.id || c.mereId === j.id
+      || j.pereId === c.id || j.mereId === c.id || c.suzerainId === j.id || j.suzerainId === c.id;
+  });
+}
+
+export const estNotable = (w: World, c: Character): boolean => c.titres.length > 0
+  || [perso(w, c.pereId), perso(w, c.mereId), perso(w, c.conjointId)].some((p) => !!p && p.titres.length > 0);
+
+export function memoriser(c: Character, type: MemoryKind, jour: Day, texte: string, autre?: number, intensite = 1): void {
+  c.memoires.push({ type, jour, texte, intensite, ...(autre !== undefined ? { autre } : {}) });
+  if (c.memoires.length > 40) c.memoires.splice(0, c.memoires.length - 40);
+}
+
+export function avis(c: Character, cible: number, valeur: number, raison: string, jusqua?: Day): void {
+  c.opinions = c.opinions.filter((o) => !(o.cible === cible && o.raison === raison));
+  c.opinions.push({ cible, valeur, raison, ...(jusqua !== undefined ? { jusqua } : {}) });
+}
+
+export interface NouveauPersonnage {
+  prenom: string; surnom?: string; sexe: Sex; naissance: Day; maisonId: string | null; cultureId: string; religionId: string;
+  pereId?: number; mereId?: number; batard?: boolean; competences: Skills; traits: string[]; courId?: number; cle?: string;
+  incertain?: boolean;
+}
+
+export function creerPersonnage(ctx: SimContext, p: NouveauPersonnage): Character {
+  const w = ctx.world;
+  const c: Character = {
+    id: ctx.newId(), prenom: p.prenom, maisonId: p.maisonId,
+    dynastieId: p.maisonId ? w.maisons[p.maisonId]?.dynastieId ?? null : null,
+    sexe: p.sexe, naissance: p.naissance, anciensConjoints: [], enfants: [], cultureId: p.cultureId, religionId: p.religionId,
+    competences: p.competences, traits: p.traits, sante: 5, tension: 0, prestige: 0, piete: 0, or: 0, titres: [],
+    opinions: [], memoires: [], portrait: ctx.rng.nextUint32(),
+    ...(p.surnom ? { surnom: p.surnom } : {}), ...(p.cle ? { cle: p.cle } : {}), ...(p.incertain ? { incertain: true } : {}),
+    ...(p.pereId !== undefined ? { pereId: p.pereId } : {}), ...(p.mereId !== undefined ? { mereId: p.mereId } : {}),
+    ...(p.batard ? { batard: true } : {}), ...(p.courId !== undefined ? { courId: p.courId } : {}),
+  };
+  w.personnages[c.id] = c;
+  w.vivants.push(c.id);
+  const pere = perso(w, p.pereId), mere = perso(w, p.mereId);
+  if (pere) pere.enfants.push(c.id);
+  if (mere) mere.enfants.push(c.id);
+  return c;
+}
+
+/** Compétences de départ : moyenne des parents (s'ils existent) + hasard. */
+export function competencesNaissance(ctx: SimContext, pere?: Character, mere?: Character): Skills {
+  const out = {} as Skills;
+  for (const s of SKILLS) {
+    const base = pere && mere ? (pere.competences[s] + mere.competences[s]) / 2 : 6;
+    out[s] = Math.max(0, Math.min(20, Math.round(ctx.rng.normal(base * 0.5 + 3, 2.5))));
+  }
+  return out;
+}
+
+export function marier(ctx: SimContext, a: Character, b: Character, matrilineaire = false): void {
+  const w = ctx.world;
+  const [h, f] = a.sexe === 'h' ? [a, b] : [b, a];
+  h.conjointId = f.id; f.conjointId = h.id;
+  if (matrilineaire) { h.matrilineaire = true; f.matrilineaire = true; }
+  // Résidence : chez le conjoint titré (l'homme par défaut)
+  const [hote, invite] = f.titres.length > 0 && h.titres.length === 0 ? [f, h] : [h, f];
+  if (invite.titres.length === 0) invite.courId = hote.titres.length > 0 ? hote.id : hote.courId ?? hote.id;
+  const jusqua = addYears(w.day, 15);
+  for (const [x, y] of [[h, f], [f, h]] as const) memoriser(x, 'mariage', w.day, `Mariage avec ${nomComplet(w, y)}`, y.id, 0.6);
+  // Rapprochement des familles
+  const ph = perso(w, h.pereId), pf = perso(w, f.pereId);
+  if (vivant(ph) && vivant(pf)) { avis(ph, pf.id, 15, 'Alliance par mariage', jusqua); avis(pf, ph.id, 15, 'Alliance par mariage', jusqua); }
+  w.stats.mariages++;
+  if (estNotable(w, h) || estNotable(w, f)) ctx.chronicle({ kind: 'mariage', text: `${nomComplet(w, h)} épouse ${nomComplet(w, f)}.`, characterIds: [h.id, f.id] });
+  if (concerneJoueur(w, [h.id, f.id])) notifier(w, `${nomComplet(w, h)} épouse ${nomComplet(w, f)}.`, false, [h.id, f.id]);
+}
+
+/** Donne un titre à un personnage (sans gérer la vassalité). */
+export function donnerTitre(w: World, titreId: string, a: Character | undefined): void {
+  const t = w.titres[titreId]!;
+  const ancien = perso(w, t.titulaireId);
+  if (ancien) ancien.titres = ancien.titres.filter((x) => x !== titreId);
+  const last = t.historique[t.historique.length - 1];
+  if (last && last.a === undefined) last.a = w.day;
+  if (a) {
+    t.titulaireId = a.id; a.titres.push(titreId); t.historique.push({ id: a.id, de: w.day });
+    if (a.courId !== undefined) delete a.courId;
+  } else delete t.titulaireId;
+}
+
+export function mourir(ctx: SimContext, r: Regles, c: Character, cause: string): void {
+  const w = ctx.world;
+  if (!vivant(c)) return;
+  c.deces = w.day; c.causeDeces = cause;
+  w.vivants = w.vivants.filter((id) => id !== c.id);
+  w.stats.deces++;
+  delete c.enceinte;
+  w.relations = w.relations.filter((rel) => rel.a !== c.id && rel.b !== c.id);
+  const conj = perso(w, c.conjointId);
+  if (conj) { delete conj.conjointId; conj.anciensConjoints.push(c.id); memoriser(conj, 'veuvage', w.day, `Veuvage : mort de ${nomComplet(w, c)}`, c.id, 0.8); }
+  delete c.conjointId;
+  for (const id of [c.pereId, c.mereId, ...c.enfants]) {
+    const k = perso(w, id); if (vivant(k)) memoriser(k, 'mort-proche', w.day, `Mort de ${nomComplet(w, c)}`, c.id, 0.7);
+  }
+  const notable = c.titres.length > 0 || estNotable(w, c);
+  const etaitJoueur = w.joueurId === c.id;
+  const succ = c.titres.length > 0 ? appliquerSuccession(ctx, r, c) : undefined;
+
+  // Les courtisans et la famille du défunt rejoignent l'héritier (ou leur propre seigneur)
+  const heritier = perso(w, succ?.principal);
+  for (const id of w.vivants) {
+    const x = w.personnages[id]!;
+    if (x.courId === c.id) { if (heritier) x.courId = heritier.id; else delete x.courId; }
+    if (x.suzerainId === c.id && x.titres.length > 0 && !succ) delete x.suzerainId;
+  }
+  if (notable) ctx.chronicle({ kind: 'deces', text: `Mort de ${nomComplet(w, c)} (${cause}).`, characterIds: [c.id] });
+  if (concerneJoueur(w, [c.id]) && !etaitJoueur) notifier(w, `${nomComplet(w, c)} est mort (${cause}).`, true, [c.id]);
+
+  if (etaitJoueur) {
+    const suivant = heritier && heritier.dynastieId === c.dynastieId ? heritier
+      : w.vivants.map((id) => w.personnages[id]!).find((x) => x.dynastieId === c.dynastieId && x.titres.length > 0);
+    if (suivant) {
+      w.joueurId = suivant.id;
+      notifier(w, `${nomComplet(w, c)} est mort (${cause}). Vous incarnez désormais ${nomComplet(w, suivant)}.`, true, [c.id, suivant.id]);
+    } else {
+      w.joueurId = null; w.finDePartie = `Votre dynastie ne possède plus aucune terre après la mort de ${nomComplet(w, c)}.`;
+      notifier(w, w.finDePartie, true, [c.id]);
+    }
+  }
+}
+
+/** Transmet les titres du défunt et réorganise la vassalité. */
+export function appliquerSuccession(ctx: SimContext, r: Regles, defunt: Character): { principal?: number } {
+  const w = ctx.world;
+  const plan = planSuccession(w, defunt);
+  const suzerainDuDefunt = perso(w, defunt.suzerainId);
+  const vassauxDuDefunt = w.vivants.map((id) => w.personnages[id]!).filter((v) => v.suzerainId === defunt.id && v.titres.length > 0);
+  const titres = [...defunt.titres];
+  if (plan.attributions.length === 0) {
+    // Déshérence : les titres reviennent au suzerain, sinon restent vacants
+    for (const t of titres) donnerTitre(w, t, vivant(suzerainDuDefunt) ? suzerainDuDefunt : undefined);
+    for (const v of vassauxDuDefunt) { if (vivant(suzerainDuDefunt)) v.suzerainId = suzerainDuDefunt.id; else delete v.suzerainId; }
+    ctx.chronicle({ kind: 'succession', text: `${nomComplet(w, defunt)} meurt sans héritier : ses terres ${vivant(suzerainDuDefunt) ? `reviennent à ${nomComplet(w, suzerainDuDefunt)}` : 'restent sans maître'}.`, characterIds: [defunt.id] });
+    w.stats.successions++;
+    return {};
+  }
+  for (const a of plan.attributions) donnerTitre(w, a.titre, w.personnages[a.heritier]);
+  const aine = w.personnages[plan.principal!]!;
+  const heritiers = [...new Set(plan.attributions.map((a) => a.heritier))].map((id) => w.personnages[id]!);
+
+  // Vassalité des héritiers
+  for (const h of heritiers) {
+    if (h.id === aine.id) {
+      // l'aîné prend la place du défunt, sauf s'il avait déjà un rang plus haut ailleurs
+      if (vivant(suzerainDuDefunt) && suzerainDuDefunt.id !== aine.id) aine.suzerainId = suzerainDuDefunt.id;
+      else if (!aine.suzerainId || aine.suzerainId === defunt.id) delete aine.suzerainId;
+    } else {
+      h.suzerainId = aine.id;
+      memoriser(h, 'heritage', w.day, `A reçu une part de l'héritage de ${nomComplet(w, defunt)}`, aine.id, 0.5);
+    }
+  }
+  // Les vassaux du défunt suivent l'aîné
+  for (const v of vassauxDuDefunt) if (!heritiers.includes(v)) v.suzerainId = aine.id;
+  // Les frères exclus d'une primogéniture s'en souviennent
+  if (w.titres[titrePrincipal(w, aine) ?? '']?.succession === 'primogeniture') {
+    for (const id of defunt.enfants) {
+      const k = w.personnages[id]!;
+      if (vivant(k) && k.id !== aine.id && k.sexe === 'h' && !k.batard && !k.clerc) {
+        memoriser(k, 'desherite', w.day, `Écarté de l'héritage au profit de ${nomComplet(w, aine)}`, aine.id, 1);
+      }
+    }
+  }
+  w.stats.successions++;
+  const noms = heritiers.map((h) => nomComplet(w, h)).join(', ');
+  ctx.chronicle({ kind: 'succession', text: `Succession de ${nomComplet(w, defunt)} : ${heritiers.length > 1 ? `partage entre ${noms}` : `${noms} hérite de tout`}.`, characterIds: [defunt.id, ...heritiers.map((h) => h.id)] });
+  if (concerneJoueur(w, [defunt.id, ...heritiers.map((h) => h.id)])) notifier(w, `Succession de ${nomComplet(w, defunt)} : ${noms}.`, false, heritiers.map((h) => h.id));
+  return { principal: aine.id };
+}

@@ -2,7 +2,7 @@
   {
     "id": "date",
     "titre": "La date",
-    "texte": "Le jeu suit le calendrier julien, celui du Moyen Âge. La partie commence le 1er janvier 1066. Le monde avance jour après jour, même quand vous ne faites rien.",
+    "texte": "Le jeu suit le calendrier julien, celui du Moyen Âge. La partie commence le 6 janvier 1066, jour du couronnement de Harold, roi d’Angleterre. Le monde avance jour après jour, même quand vous ne faites rien.",
     "voirAussi": ["vitesse", "pause"]
   },
   {

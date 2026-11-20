@@ -1,0 +1,13 @@
+{
+  "cultures": [
+    { "id": "francien", "nom": "Française", "groupe": "francique" },
+    { "id": "normand", "nom": "Normande", "groupe": "francique" },
+    { "id": "breton", "nom": "Bretonne", "groupe": "brittonique" },
+    { "id": "flamand", "nom": "Flamande", "groupe": "germanique" },
+    { "id": "occitan", "nom": "Occitane", "groupe": "latin" },
+    { "id": "anglo-saxon", "nom": "Anglo-saxonne", "groupe": "germanique" }
+  ],
+  "religions": [
+    { "id": "catholique", "nom": "Chrétienté latine", "autorite": "le pape" }
+  ]
+}

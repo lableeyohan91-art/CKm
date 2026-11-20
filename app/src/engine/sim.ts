@@ -35,7 +35,9 @@ export function createWorld(seed: string, startDay: Day = 0): World {
     queue: [],
     chronicle: [],
     flags: {},
-    stats: { daysSimulated: 0 },
+    stats: { daysSimulated: 0, naissances: 0, deces: 0, mariages: 0, successions: 0 },
+    personnages: {}, vivants: [], dynasties: {}, maisons: {}, titres: {}, comtes: {}, relations: [],
+    joueurId: null, notifications: [],
   };
 }
 

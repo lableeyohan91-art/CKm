@@ -1,0 +1,32 @@
+{
+  "francien": {
+    "h": ["Hugues", "Raoul", "Eudes", "Gautier", "Thibaut", "Renaud", "Geoffroy", "Simon", "Manassès", "Bouchard", "Hervé", "Galeran", "Amaury", "Josselin", "Gui", "Anseau", "Milon", "Dreux", "Aubri", "Étienne"],
+    "f": ["Adèle", "Agnès", "Hildegarde", "Ermengarde", "Mathilde", "Aénor", "Héloïse", "Alix", "Béatrice", "Isabelle", "Richilde", "Gerberge", "Emma", "Hodierne", "Mélisende"],
+    "lieux": ["Montmorency", "Coucy", "Montlhéry", "Beaumont", "Rochefort", "Le Puiset", "Garlande", "Montfort", "Breteuil", "Nogent", "Amboise", "Sainte-Maure", "Craon", "Sablé", "Vendôme", "Joigny", "Brienne", "Ramerupt", "Broyes", "Montbard"]
+  },
+  "normand": {
+    "h": ["Richard", "Robert", "Raoul", "Guillaume", "Roger", "Onfroi", "Gautier", "Hugues", "Néel", "Osbern", "Turstin", "Raoul", "Enguerrand", "Baudri"],
+    "f": ["Emma", "Gonnor", "Adèle", "Mathilde", "Agnès", "Lesceline", "Papie", "Sibylle", "Isabelle"],
+    "lieux": ["Tosny", "Montgommery", "Grandmesnil", "Beaumont", "Warenne", "Giffard", "Tancarville", "Bellême", "Harcourt", "Ferrières", "Clare", "Mowbray", "Saint-Sauveur", "Crespin"]
+  },
+  "breton": {
+    "h": ["Alain", "Eudes", "Judicaël", "Guéthenoc", "Riwallon", "Josselin", "Main", "Raoul", "Hervé", "Derrien", "Morvan"],
+    "f": ["Havoise", "Constance", "Agnès", "Orguen", "Berthe", "Judith", "Adèle", "Ermengarde"],
+    "lieux": ["Léon", "Rohan", "Porhoët", "Vitré", "Fougères", "Châteaubriant", "Dinan", "Retz", "Ancenis", "Hennebont"]
+  },
+  "flamand": {
+    "h": ["Baudouin", "Arnoul", "Robert", "Thierry", "Gérard", "Lambert", "Gautier", "Roger", "Eustache", "Wautier", "Rasse"],
+    "f": ["Gertrude", "Richilde", "Judith", "Adèle", "Clémence", "Gisèle", "Ide", "Mathilde", "Sibylle"],
+    "lieux": ["Béthune", "Gand", "Ypres", "Aire", "Saint-Omer", "Guînes", "Lille", "Courtrai", "Oudenarde", "Alost"]
+  },
+  "occitan": {
+    "h": ["Raimond", "Bernard", "Pons", "Guilhem", "Aimeric", "Hugues", "Roger", "Bertrand", "Arnaut", "Sicard", "Peire"],
+    "f": ["Ermessende", "Garsende", "Almodis", "Faydide", "Azalaïs", "Ermengarde", "Philippa", "Rixende"],
+    "lieux": ["Lusignan", "Parthenay", "Thouars", "Châtellerault", "Turenne", "Ventadour", "Comborn", "Albret", "Lautrec", "Foix"]
+  },
+  "anglo-saxon": {
+    "h": ["Ælfric", "Eadric", "Wulfstan", "Leofric", "Godric", "Osgod", "Brihtric", "Edwin", "Morcar", "Waltheof", "Ælfgar", "Siward"],
+    "f": ["Ælfgifu", "Eadgyth", "Godgifu", "Wulfrun", "Ealdgyth", "Leofrun", "Æthelflæd", "Gunhild"],
+    "lieux": ["Wiltshire", "Sussex", "Surrey", "Berkshire", "Dorset", "Somerset", "Hampshire", "Middlesex", "Essex", "Hertford"]
+  }
+}

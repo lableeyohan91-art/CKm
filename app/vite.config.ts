@@ -8,7 +8,9 @@ export default defineConfig({
   worker: { format: 'es' },
   test: {
     environment: 'node',
-    include: ['tests/**/*.test.ts'],
+    // Les outils (simulations longues avec statistiques) se lancent à part : OUTILS=1 npx vitest run
+    include: process.env.OUTILS ? ['tests/outils/**/*.test.ts'] : ['tests/**/*.test.ts'],
+    exclude: process.env.OUTILS ? [] : ['tests/outils/**', 'node_modules/**'],
     testTimeout: 120_000,
   },
 });

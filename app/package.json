@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "sim": "vitest run tests/long"
+    "sim": "OUTILS=1 vitest run"
   },
   "dependencies": {
     "idb": "8.0.1",

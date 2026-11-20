@@ -1,0 +1,15 @@
+[
+  { "id": "capetiens", "nom": "Capétiens", "maisons": [{ "id": "capet", "nom": "Capet" }, { "id": "capet-bourgogne", "nom": "Bourgogne", "parent": "capet" }] },
+  { "id": "rollonides", "nom": "Rollonides", "maisons": [{ "id": "normandie", "nom": "Normandie" }, { "id": "evreux", "nom": "Évreux", "parent": "normandie" }] },
+  { "id": "flandre", "nom": "Maison de Flandre", "maisons": [{ "id": "flandre", "nom": "Flandre" }] },
+  { "id": "boulogne", "nom": "Maison de Boulogne", "maisons": [{ "id": "boulogne", "nom": "Boulogne" }] },
+  { "id": "ingelgeriens", "nom": "Ingelgeriens", "maisons": [{ "id": "anjou", "nom": "Anjou" }] },
+  { "id": "thibaldiens", "nom": "Thibaldiens", "maisons": [{ "id": "blois", "nom": "Blois" }] },
+  { "id": "herbertiens", "nom": "Herbertiens", "maisons": [{ "id": "vermandois", "nom": "Vermandois" }] },
+  { "id": "ramnulfides", "nom": "Ramnulfides", "maisons": [{ "id": "poitiers", "nom": "Poitiers" }] },
+  { "id": "raimondins", "nom": "Raimondins", "maisons": [{ "id": "toulouse", "nom": "Toulouse" }] },
+  { "id": "rennes", "nom": "Maison de Rennes", "maisons": [{ "id": "rennes", "nom": "Rennes" }] },
+  { "id": "cornouaille", "nom": "Maison de Cornouaille", "maisons": [{ "id": "cornouaille", "nom": "Cornouaille" }] },
+  { "id": "godwin", "nom": "Godwin", "maisons": [{ "id": "godwin", "nom": "Godwin" }] },
+  { "id": "cerdic", "nom": "Maison de Wessex", "maisons": [{ "id": "wessex", "nom": "Wessex" }] }
+]
