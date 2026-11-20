@@ -1,8 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
-import { loadData } from '../../data/load';
-import terres from '../../../data/scenarios/1066/terres.json';
+import geometrie from '../../../data/scenarios/1066/geometrie.json';
 import type { ComteVue } from '../../worker/vues';
-import { construireCarte } from '../carte/geometrie';
+import { construireCarte, type GeometrieDonnees } from '../carte/geometrie';
 import { Explain, Tip } from '../guide';
 import { PersoLien } from '../composants/communs';
 
@@ -13,8 +12,7 @@ const MODES: { id: Mode; nom: string }[] = [{ id: 'politique', nom: 'Politique' 
 const EMAUX = ['#a33b2e', '#2f5d8a', '#3f7a46', '#7a4f8f', '#b8862b', '#2e6f73', '#8f5a3c', '#5b6b2e', '#9a3f6a', '#43507f', '#b5632e', '#5f7f99', '#6f3b2e', '#4f8a6f'];
 function teinte(cle: string): string { let h = 0; for (let i = 0; i < cle.length; i++) h = (h * 31 + cle.charCodeAt(i)) >>> 0; return EMAUX[h % EMAUX.length]!; }
 
-const data = loadData();
-const geo = construireCarte(data.scenario.carte.comtes, terres.terres as { id: string; contour: [number, number][] }[], terres.comtesParTerre);
+const geo = construireCarte(geometrie as unknown as GeometrieDonnees);
 
 export function Carte({ comtes, onPerso, joueurId }: { comtes: ComteVue[]; onPerso: (id: number) => void; joueurId: number | null }) {
   const [mode, setMode] = useState<Mode>('politique');
@@ -23,12 +21,19 @@ export function Carte({ comtes, onPerso, joueurId }: { comtes: ComteVue[]; onPer
   const drag = useRef<{ x: number; y: number; vx: number; vy: number; moved: boolean } | null>(null);
   const parId = useMemo(() => new Map(comtes.map((c) => [c.id, c])), [comtes]);
   const maxDev = Math.max(...comtes.map((c) => c.developpement), 1);
+  // Une couleur distincte par fief ou dynastie présents (attribution stable par ordre alphabétique)
+  const palette = useMemo(() => {
+    const cles = [...new Set(comtes.flatMap((c) => [c.dynastieId ? `d:${c.dynastieId}` : '', c.grandFief ? `g:${c.grandFief.id}` : '']).filter(Boolean))];
+    const m = new Map<string, string>();
+    for (const prefixe of ['d:', 'g:']) cles.filter((k) => k.startsWith(prefixe)).sort().forEach((k, i) => m.set(k, i < EMAUX.length ? EMAUX[i]! : teinte(k)));
+    return m;
+  }, [comtes]);
 
   const couleur = (c: ComteVue | undefined): string => {
     if (!c) return 'var(--rule)';
     if (mode === 'economique') { const t = c.developpement / maxDev; return `hsl(42 ${30 + t * 45}% ${82 - t * 42}%)`; }
-    if (mode === 'dynastique') return c.dynastieId ? teinte(c.dynastieId) : 'var(--rule)';
-    return c.grandFief ? teinte(`gf${c.grandFief.id}`) : 'var(--rule)';
+    if (mode === 'dynastique') return c.dynastieId ? palette.get(`d:${c.dynastieId}`)! : 'var(--rule)';
+    return c.grandFief ? palette.get(`g:${c.grandFief.id}`)! : 'var(--rule)';
   };
   const choisi = sel ? parId.get(sel) : undefined;
   const W = geo.largeur, H = geo.hauteur;
@@ -38,7 +43,7 @@ export function Carte({ comtes, onPerso, joueurId }: { comtes: ComteVue[]; onPer
 
   return (
     <div className="carte-ecran">
-      <Tip id="carte"><p>Voici la France et le sud de l’Angleterre en 1066. Chaque zone est un <b>comté</b>. Touchez-en un pour savoir qui le tient. Les couleurs changent selon le mode choisi en haut.</p></Tip>
+      <Tip id="carte"><p>Voici la France et le sud de l’Angleterre en 1066 (côtes et fleuves réels, d’après Natural Earth). Chaque zone est un <b>comté</b>. Touchez-en un pour savoir qui le tient. Les couleurs changent selon le mode choisi en haut.</p></Tip>
       <div className="modes" role="group" aria-label="Mode de carte">
         {MODES.map((m) => <button key={m.id} className="btn" aria-pressed={mode === m.id} onClick={() => setMode(m.id)}>{m.nom}</button>)}
         <Explain id="carte-modes" label="les modes de carte" />
@@ -67,6 +72,7 @@ export function Carte({ comtes, onPerso, joueurId }: { comtes: ComteVue[]; onPer
               onClick={() => { if (!drag.current?.moved) setSel(g.id); }} role="button" tabIndex={0} aria-label={c?.nom}
               onKeyDown={(e) => { if (e.key === 'Enter') setSel(g.id); }} />;
           })}
+          {geo.fleuves.map((d, i) => <path key={`f${i}`} d={d} className="fleuve" />)}
           {geo.comtes.map((g) => <text key={`t${g.id}`} x={g.label[0]} y={g.label[1]} className="lbl" style={{ fontSize: 11 / Math.sqrt(vue.z) }}>{parId.get(g.id)?.nom}</text>)}
         </svg>
       </div>
