@@ -223,13 +223,11 @@ calculé). Chaque événement important écrit dans la **chronique**.
 - Passage à l'échelle : pré-calcul des formes, simplification selon le zoom,
   rendu Canvas/WebGL si le SVG ralentit au-delà de quelques centaines de comtés.
 
-## 11. Hébergement (à décider)
+## 11. Hébergement
 
-Dépôt public `ckm` : publication prévue avec **GitHub Pages** (gratuit pour un dépôt public).
-Une PWA installable et hors ligne a besoin
-(un service worker ne fonctionne pas dans une page publiée sur claude.ai).
-Options : GitHub Pages (gratuit seulement pour un dépôt public), Netlify,
-Cloudflare Pages ou Vercel (gratuits avec un dépôt privé).
+Dépôt public `ckm` : publication avec **GitHub Pages**, gratuit pour un dépôt
+public. Une PWA installable et hors ligne doit être servie depuis un vrai site :
+un service worker ne fonctionne pas dans une page publiée sur claude.ai.
 
 ## 12. Risques techniques principaux
 
