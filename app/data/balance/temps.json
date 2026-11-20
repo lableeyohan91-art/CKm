@@ -1,0 +1,5 @@
+{
+  "joursParSeconde": [2, 7, 30, 120, 730],
+  "sauvegardeAuto": "annuelle",
+  "dateDeDepart": { "annee": 1066, "mois": 1, "jour": 1 }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "date",
+    "titre": "La date",
+    "texte": "Le jeu suit le calendrier julien, celui du Moyen Âge. La partie commence le 1er janvier 1066. Le monde avance jour après jour, même quand vous ne faites rien.",
+    "voirAussi": ["vitesse", "pause"]
+  },
+  {
+    "id": "pause",
+    "titre": "La pause",
+    "texte": "En pause, le temps s'arrête : vous pouvez tout consulter et préparer vos décisions. Le jeu se met aussi en pause tout seul quand une décision importante vous attend.",
+    "voirAussi": ["vitesse"]
+  },
+  {
+    "id": "vitesse",
+    "titre": "Les vitesses",
+    "texte": "Cinq vitesses : de quelques jours par seconde à plusieurs années par seconde. Vous pouvez aussi avancer d'un jour ou d'un mois à la main avec les boutons « +1 jour » et « +1 mois ».",
+    "voirAussi": ["pause", "date"]
+  },
+  {
+    "id": "sauvegarde",
+    "titre": "Les sauvegardes",
+    "texte": "La partie est sauvegardée automatiquement chaque année dans votre navigateur. Pour ne jamais la perdre (changement de téléphone, nettoyage du navigateur), exportez-la régulièrement dans un fichier.",
+    "voirAussi": []
+  },
+  {
+    "id": "graine",
+    "titre": "La graine",
+    "texte": "Mot qui détermine tout le hasard de la partie. Deux parties lancées avec la même graine et les mêmes décisions se déroulent exactement de la même façon. Utile pour reproduire une situation.",
+    "voirAussi": []
+  }
+]

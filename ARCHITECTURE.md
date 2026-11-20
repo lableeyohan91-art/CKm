@@ -27,14 +27,14 @@ Version 0.1 — proposition avant développement.
 | Rôle | Choix | Raison |
 |---|---|---|
 | Langage | TypeScript strict | modèle de données riche, refactorisations sûres |
-| Interface | React 18 + Vite | demandé ; écosystème, rapidité |
-| État de l'interface | Zustand (léger) | stocke les vues reçues du worker |
+| Interface | React 18.3 + Vite 6 | demandé ; versions stables éprouvées |
+| État de l'interface | état React simple ; Zustand si le besoin apparaît | stocke les vues reçues du worker |
 | Carte | **SVG** au prototype, passage **Canvas/WebGL** si nécessaire | SVG simple et précis au toucher jusqu'à quelques centaines de zones |
-| Simulation | Web Worker + Comlink | calcul hors du fil d'affichage |
+| Simulation | Web Worker + protocole de messages maison (`src/worker/protocol.ts`) | calcul hors du fil d'affichage, sans dépendance |
 | Validation des données | Zod | schémas = documentation + erreurs claires |
 | Sauvegarde | IndexedDB (via idb) + compression | grosses sauvegardes, hors ligne |
 | Hors ligne / installation | vite-plugin-pwa (service worker) | PWA Android, iOS, PC |
-| Tests | Vitest (+ Playwright pour l'interface) | rapides, même outil pour le moteur et les simulations longues |
+| Tests | Vitest 3 (+ Playwright pour l'interface) | rapides, même outil pour le moteur et les simulations longues |
 | Qualité | ESLint, Prettier, tests en intégration continue (GitHub Actions) | |
 
 ## 3. Organisation des dossiers
@@ -76,7 +76,7 @@ Toutes les entités sont dans des tables indexées par identifiant numérique
 l'exigent).
 
 ```ts
-type Date = number;           // jours depuis le 1er janvier 1066
+type Day = number;            // jours depuis le 1er janvier 1066 (négatif avant), calendrier julien, valable dès l'an 800
 
 interface Character {
   id; firstName; dynastyId; houseId; sex; birth: Date; death?: Date;

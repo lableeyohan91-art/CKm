@@ -20,7 +20,7 @@ mémoire, IA, économie, sauvegarde**. C'est exactement le prototype demandé.
 
 ---
 
-## Phase 0 — Fondations techniques (sans contenu de jeu)
+## Phase 0 — Fondations techniques (sans contenu de jeu) — ✅ terminée
 - Projet Vite + React + TypeScript strict, ESLint, Vitest, intégration continue.
 - Noyau : horloge, planificateur à fréquences, file datée, RNG à graine,
   tables d'entités, journal.
@@ -28,6 +28,7 @@ mémoire, IA, économie, sauvegarde**. C'est exactement le prototype demandé.
 - Worker + protocole commandes/vues.
 - Sauvegarde v1 (IndexedDB, version, export/import).
 - Mode développeur minimal (date, vitesse, graine, état brut).
+- Accompagnement : bouton « i » et glossaire, conseils de première fois.
 - **Fin** : un monde vide avance de 500 ans sans erreur ; sauvegarder/recharger
   donne le même résultat ; tests verts.
 
@@ -46,6 +47,8 @@ Contenu : 30 comtés (France élargie, 1066), ~100 personnages, 8 à 12 dynastie
 - Chronique automatique.
 - Interface portrait : carte SVG (modes politique et dynastique), fiche
   personnage, arbre généalogique simple, notifications, temps (pause, 5 vitesses).
+- Accompagnement : explications de toutes les valeurs (détail des calculs),
+  raisons d'acceptation ou de refus, conseiller de cour, glossaire enrichi.
 - Mode développeur : inspecteur des décisions de l'IA, édition des
   personnages, mode observateur, simulation accélérée de 300 ans, statistiques.
 - **Fin** : 300 ans simulés sans anomalie (pas d'orphelin de titre, pas de

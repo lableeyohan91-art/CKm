@@ -232,14 +232,34 @@ compétences en français), proposition de noms :
 Le vocabulaire féodal historique (ost, hommage, commise, relief) est libre et
 renforce l'identité.
 
-## 13. Temps
+## 13. Accompagnement du joueur (exigence prioritaire)
+
+Le genre est réputé difficile d'accès. Ici, le joueur doit **toujours pouvoir
+comprendre** ce qui se passe, sans quitter le jeu. Présent dès la phase 0, et
+enrichi à chaque phase :
+
+- **Bouton « i »** à côté de chaque notion : ouvre une explication en langage
+  simple, avec des renvois (« Voir aussi »). Les textes sont dans un fichier de
+  données (`data/guide/glossaire.json`), donc faciles à enrichir.
+- **Conseils de première fois** : un conseil s'affiche la première fois qu'on
+  découvre un écran ou une mécanique, puis se fait oublier.
+- **Raisons toujours visibles** : chaque valeur affiche le détail de son calcul ;
+  chaque proposition dit à l'avance « acceptera / refusera » et pourquoi.
+- **Conseiller** (phase 1 puis 4) : un personnage de la cour (le chapelain ou le
+  chancelier) commente la situation et suggère des actions possibles, sans
+  jamais jouer à la place du joueur. Il peut être désactivé.
+- **Première partie guidée** : un parcours facultatif qui fait découvrir les
+  mécaniques une par une, au rythme du jeu.
+- **Encyclopédie** : toutes les explications regroupées et cherchables.
+
+## 14. Temps
 
 Temps réel avec pause, **cinq vitesses**, avance manuelle (jour, mois).
 **Pause automatique** configurable sur les événements importants (indispensable
 sur téléphone, sinon le joueur rate des décisions). Le monde évolue même si le
 joueur ne fait rien.
 
-## 14. Interface (portrait, mobile d'abord)
+## 15. Interface (portrait, mobile d'abord)
 
 Écrans : carte, personnage, cour, conseil, dynastie et arbre, relations,
 diplomatie, intrigues, armées, économie, territoires, notifications, chronique.
