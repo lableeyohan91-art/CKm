@@ -1,8 +1,27 @@
 {
-  "_commentaire": "Ajustements des images livrées : échelle autour du centre de la toile 1024×1536, puis décalage dx/dy en pixels. Lot 0 : la tête a été générée environ 1,7 fois plus grande que le gabarit.",
-  "visage-h-adulte-1": { "echelle": 0.58, "dy": 30 },
-  "cheveux-h-court": { "echelle": 0.58, "dy": 30 },
-  "barbe-courte": { "echelle": 0.58, "dy": 30 },
-  "vetement-h-tunique": { "echelle": 0.58, "dy": 30 },
-  "couronne-royale": { "echelle": 0.58, "dy": -80 }
+  "_commentaire": "Ajustements des images livrées : échelle autour du centre de la toile 1024×1536, puis décalage dx/dy en pixels. ChatGPT dessine la tête environ 1,7 fois plus grande que le gabarit, mais toujours à la même taille : « _defautCalque » applique la correction à tous les calques transparents sans réglage propre.",
+  "visage-h-adulte-1": {
+    "echelle": 0.58,
+    "dy": 30
+  },
+  "cheveux-h-court": {
+    "echelle": 0.58,
+    "dy": 30
+  },
+  "barbe-courte": {
+    "echelle": 0.58,
+    "dy": 30
+  },
+  "vetement-h-tunique": {
+    "echelle": 0.58,
+    "dy": 30
+  },
+  "couronne-royale": {
+    "echelle": 0.58,
+    "dy": -80
+  },
+  "_defautCalque": {
+    "echelle": 0.58,
+    "dy": 30
+  }
 }

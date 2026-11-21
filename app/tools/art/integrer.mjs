@@ -68,7 +68,7 @@ for (const a of catalogue.assets) {
   if (Math.abs(ratio - ratioAttendu) / ratioAttendu > 0.02) rapport.avertissements.push(`${a.id} : proportions ${meta.width}x${meta.height} au lieu de ${f.largeur}x${f.hauteur} (l'image sera ajustée, vérifiez l'alignement)`);
   if (f.transparent && !meta.hasAlpha) rapport.avertissements.push(`${a.id} : pas de transparence alors qu'un calque transparent est attendu`);
   // Mise à l'échelle sur la toile de référence, puis réglage manuel éventuel (décalage, échelle)
-  const r = reglages[a.id] ?? {};
+  const r = reglages[a.id] ?? (f.transparent ? reglages._defautCalque ?? {} : {});
   const echelle = r.echelle ?? 1;
   const lw = Math.round(f.largeur * echelle), lh = Math.round(f.hauteur * echelle);
   const fond = f.transparent ? { r: 0, g: 0, b: 0, alpha: 0 } : { r: 0, g: 0, b: 0, alpha: 1 };
