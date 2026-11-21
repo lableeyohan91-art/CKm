@@ -39,6 +39,7 @@ export function createWorld(seed: string, startDay: Day = 0): World {
     personnages: {}, vivants: [], dynasties: {}, maisons: {}, titres: {}, comtes: {}, relations: [],
     joueurId: null, notifications: [],
     conseils: {}, alliances: [], prets: [], propositions: [],
+    guerres: [], armees: [], treves: [], occupations: {},
   };
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { loadData } from '../data/load';
 import { SimClient } from '../worker/client';
 import type { Speed, WorldView } from '../worker/protocol';
-import type { ComteVue } from '../worker/vues';
+import type { ComteVue, VueGuerre } from '../worker/vues';
 import { getSlot, putSlot } from '../save/storage';
 import { Explain, GuideProvider } from './guide';
 import { Carte } from './ecrans/Carte';
@@ -12,12 +12,13 @@ import { Dynastie } from './ecrans/Dynastie';
 import { Chronique } from './ecrans/Chronique';
 import { Notifications } from './ecrans/Notifications';
 import { Plus } from './ecrans/Plus';
+import { Guerre } from './ecrans/Guerre';
 
 const data = loadData();
 const SPEEDS: Speed[] = [1, 2, 3, 4, 5];
-type Onglet = 'carte' | 'personnage' | 'dynastie' | 'chronique' | 'plus';
+type Onglet = 'carte' | 'personnage' | 'guerre' | 'dynastie' | 'chronique' | 'plus';
 const ONGLETS: { id: Onglet; nom: string; ico: string }[] = [
-  { id: 'carte', nom: 'Carte', ico: '⛬' }, { id: 'personnage', nom: 'Personnage', ico: '♔' }, { id: 'dynastie', nom: 'Dynastie', ico: '⚜' },
+  { id: 'carte', nom: 'Carte', ico: '⛬' }, { id: 'personnage', nom: 'Personnage', ico: '♔' }, { id: 'guerre', nom: 'Guerre', ico: '⚔' }, { id: 'dynastie', nom: 'Dynastie', ico: '⚜' },
   { id: 'chronique', nom: 'Chronique', ico: '❧' }, { id: 'plus', nom: 'Plus', ico: '☰' },
 ];
 
@@ -28,6 +29,7 @@ export function App() {
   const [fiche, setFiche] = useState<number[]>([]);        // pile de fiches ouvertes
   const [notifs, setNotifs] = useState(false);
   const [comtes, setComtes] = useState<ComteVue[]>([]);
+  const [guerre, setGuerre] = useState<VueGuerre | null>(null);
   const [alerte, setAlerte] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [slotsVersion, setSlotsVersion] = useState(0);
@@ -51,6 +53,13 @@ export function App() {
 
   // La carte se recharge une fois par mois de jeu
   useEffect(() => { if (view) client.demander<ComteVue[]>({ quoi: 'carte' }).then(setComtes); }, [client, view?.mois, view?.joueur?.id, view?.enCours]);
+
+  // Les armées bougent chaque jour : vue de guerre rechargée à chaque jour de jeu tant qu'il y a des guerres
+  useEffect(() => {
+    if (!view) return;
+    if (!view.guerres) { setGuerre(null); return; }
+    client.demander<VueGuerre>({ quoi: 'guerre' }).then(setGuerre);
+  }, [client, view?.day, view?.guerres, version]);
 
   const ouvrir = (id: number) => { setFiche((f) => [...f, id]); setNotifs(false); };
   const ficheId = fiche[fiche.length - 1];
@@ -103,7 +112,8 @@ export function App() {
                 <button className="btn" onClick={() => setFiche((f) => f.slice(0, -1))}>← Retour</button>
                 <Fiche client={client} id={ficheId} jour={jour} onPerso={ouvrir} joueurId={joueurId} version={version} onFait={fait} />
               </>
-            ) : onglet === 'carte' ? <Carte comtes={comtes} onPerso={ouvrir} joueurId={joueurId} />
+            ) : onglet === 'carte' ? <Carte comtes={comtes} onPerso={ouvrir} joueurId={joueurId} guerre={guerre} client={client} />
+            : onglet === 'guerre' ? <Guerre guerre={guerre} joueurId={joueurId} onPerso={ouvrir} onCarte={() => setOnglet('carte')} />
             : onglet === 'personnage' ? (joueurId !== null ? <Fiche client={client} id={joueurId} jour={jour} onPerso={ouvrir} joueurId={joueurId} version={version} onFait={fait} /> : <p className="muted">Mode observateur : touchez un comté de la carte pour ouvrir la fiche de son seigneur.</p>)
             : onglet === 'dynastie' ? <Dynastie client={client} id={joueurId} jour={jour} onPerso={ouvrir} />
             : onglet === 'chronique' ? <Chronique client={client} jour={jour} onPerso={ouvrir} joueur={joueurId !== null} />
@@ -114,7 +124,7 @@ export function App() {
           {ONGLETS.map((o) => (
             <button key={o.id} aria-current={onglet === o.id && !fiche.length && !notifs ? 'page' : undefined}
               onClick={() => { setOnglet(o.id); setFiche([]); setNotifs(false); }}>
-              <span aria-hidden="true">{o.ico}</span>{o.nom}
+              <span aria-hidden="true">{o.ico}</span>{o.nom}{o.id === 'guerre' && !!view?.mesGuerres && <span className="pastille">{view.mesGuerres}</span>}
             </button>
           ))}
         </nav>

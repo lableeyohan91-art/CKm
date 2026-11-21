@@ -32,7 +32,7 @@ export class SimClient {
   }
 
   /** Envoie une commande qui attend un résultat (interagir, répondre). */
-  commande<T>(m: { type: 'interagir'; id: string; cible: number; params: Record<string, string | number | boolean> } | { type: 'repondre'; proposition: number; accepte: boolean }): Promise<T> {
+  commande<T>(m: { type: 'interagir'; id: string; cible: number; params: Record<string, string | number | boolean> } | { type: 'repondre'; proposition: number; accepte: boolean } | { type: 'ordre'; armee: number; vers: string | null }): Promise<T> {
     const requestId = this.nextRequest++;
     return new Promise((resolve) => { this.pending.set(requestId, resolve as (r: unknown) => void); this.send({ ...m, requestId } as ToWorker); });
   }

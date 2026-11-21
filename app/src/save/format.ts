@@ -21,6 +21,12 @@ export const MIGRATIONS: Record<number, Migration> = {
   1: () => { throw new SaveError("Sauvegarde de la version d'essai 0.0.1 (monde vide) : elle ne peut pas être reprise. Commencez une nouvelle partie."); },
   // v2 → v3 : arrivée des interactions (conseil, alliances, prêts, propositions)
   2: (w) => ({ ...w, conseils: {}, alliances: [], prets: [], propositions: [] }),
+  // v3 → v4 : guerre (revendications, guerres, armées, trêves)
+  3: (w) => {
+    const persos = w.personnages as Record<string, Record<string, unknown>>;
+    for (const c of Object.values(persos)) if (!c.revendications) c.revendications = [];
+    return { ...w, guerres: [], armees: [], treves: [], occupations: {} };
+  },
 };
 
 export class SaveError extends Error {}

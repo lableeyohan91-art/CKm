@@ -8,6 +8,7 @@ import { evaluer, executer, interaction, type C } from '../interactions';
 import type { Regles } from '../rules/regles';
 import { tirerTraits } from '../scenario/build';
 import type { JournalIA } from './journal';
+import { optionsForger, optionsGuerre } from './guerre';
 
 /**
  * IA des personnages : « Utility AI ».
@@ -37,7 +38,7 @@ export function systemeIA(sim: Simulation, r: Regles, journal: JournalIA): void 
 function reflechir(ctx: SimContext, r: Regles, c: Character, celibs: Character[], journal: JournalIA): void {
   const options: Option[] = [{ action: 'attendre', score: SEUIL_ATTENTE, raisons: [{ source: 'Ne rien faire', valeur: SEUIL_ATTENTE }], executer: () => {} }];
   options.push(...optionsMariage(ctx, r, c, celibs), ...optionsCadeau(ctx, r, c), ...optionsReligion(ctx, r, c),
-    ...optionsDoterFils(ctx, r, c), ...optionsAideOr(ctx, r, c), ...optionsAlliance(ctx, r, c), ...optionsTrahison(ctx, r, c));
+    ...optionsDoterFils(ctx, r, c), ...optionsAideOr(ctx, r, c), ...optionsAlliance(ctx, r, c), ...optionsTrahison(ctx, r, c), ...optionsGuerre(ctx, r, c), ...optionsForger(ctx, r, c));
   options.sort((a, b) => b.score - a.score);
   const top = options.slice(0, 3).filter((o) => o.score >= options[0]!.score * 0.7);
   const choix = ctx.rng.weighted(top, (o) => o.score) ?? options[0]!;

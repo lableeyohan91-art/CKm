@@ -157,6 +157,7 @@ const revoquerTitre: Interaction = {
     if (motive) avis(cible, a.id, -50, `M'a dépouillé de ${nomT}`);
     else trahir(c.w, a, cible, `m'a dépouillé de ${nomT} sans motif`, 70);
     memoriser(cible, 'spolie', c.w.day, `Dépouillé de ${nomT} par ${nomComplet(c.w, a)}`, a.id, 1);
+    if (!motive && !cible.revendications.some((x) => x.titre === t)) cible.revendications.push({ titre: t, forte: true, origine: `Révoqué sans motif par ${a.prenom}` });
     if (!cible.titres.length) {
       delete cible.suzerainId; cible.courId = a.id;
       for (const id of c.w.vivants) { const v = c.w.personnages[id]!; if (v.suzerainId === cible.id && v.titres.length) v.suzerainId = a.id; }

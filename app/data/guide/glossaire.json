@@ -306,5 +306,81 @@
       "memoire",
       "interactions"
     ]
+  },
+  {
+    "id": "guerre",
+    "titre": "La guerre",
+    "texte": "On ne fait pas la guerre sans motif : il faut une revendication sur un titre, ou viser un comté qui relève de droit de votre duché ou royaume. À la déclaration, vos alliés sont appelés aux armes (un allié qui refuse vous trahit) et chaque camp lève son ost. Les armées marchent de comté en comté, se battent quand elles se rencontrent et assiègent les comtés ennemis. La guerre finit par une paix négociée, ou d'elle-même quand le score atteint ±100 ou après cinq ans. Une trêve de dix ans suit.",
+    "voirAussi": [
+      "revendication",
+      "ost",
+      "score-guerre",
+      "siege",
+      "treve"
+    ]
+  },
+  {
+    "id": "revendication",
+    "titre": "Les revendications",
+    "texte": "Une revendication est un droit sur un titre que vous ne tenez pas : c'est un motif de guerre. Elle est forte (héritage, titre perdu ou révoqué) ou faible (fils écarté d'un héritage, revendication forgée par votre chancelier). Faire la guerre pour une revendication faible coûte 100 de prestige. Les revendications fortes passent à votre héritier.",
+    "voirAussi": [
+      "guerre",
+      "forger"
+    ]
+  },
+  {
+    "id": "forger",
+    "titre": "Forger une revendication",
+    "texte": "Votre chancelier cherche dans les archives (ou invente) des droits sur une terre voisine. Ses chances dépendent de sa diplomatie. En cas d'échec, la victime l'apprend et vous en veut. Une tentative par an.",
+    "voirAussi": [
+      "revendication",
+      "conseil"
+    ]
+  },
+  {
+    "id": "ost",
+    "titre": "L'ost (la levée)",
+    "texte": "En temps de guerre, chaque seigneur rassemble ses hommes : environ 80 par point de développement de son domaine (selon le contrôle), plus une part de l'ost de ses vassaux. Un vassal qui vous aime envoie jusqu'à 80 % de ses hommes ; un vassal qui vous déteste, presque rien. L'armée est menée par vous ou par votre maréchal, le meilleur à la guerre des deux. Elle se dissout à la paix.",
+    "voirAussi": [
+      "guerre",
+      "moral",
+      "conseil"
+    ]
+  },
+  {
+    "id": "moral",
+    "titre": "Le moral",
+    "texte": "Une armée vaincue perd du moral (35 points) et recule ; une armée au repos en terre amie le regagne. La force d'une armée = ses hommes × son moral × le talent de guerre de son commandant, plus un bonus de terrain (collines, marais, bocage) pour le camp qui tient le comté, et une part de hasard.",
+    "voirAussi": [
+      "ost",
+      "siege"
+    ]
+  },
+  {
+    "id": "siege",
+    "titre": "Les sièges",
+    "texte": "Une armée arrêtée dans un comté ennemi, sans armée ennemie en face, l'assiège. La durée dépend des fortifications du comté (et de la taille de l'armée). Le comté pris est occupé : il compte dans le score de guerre jusqu'à la paix ou jusqu'à ce que l'ennemi le reprenne. L'hiver et le manque de ravitaillement (trop d'hommes dans un comté pauvre) font fondre les armées.",
+    "voirAussi": [
+      "score-guerre",
+      "moral"
+    ]
+  },
+  {
+    "id": "score-guerre",
+    "titre": "Le score de guerre",
+    "texte": "De −100 à +100, vu de votre camp. Les batailles gagnées rapportent jusqu'à 60 points (capturer le chef ennemi : 40 d'un coup), les comtés occupés le reste, selon leur richesse (l'enjeu de la guerre compte 1,5 fois). À +100, la victoire est automatique ; à +40, l'ennemi accepte souvent de se rendre. Si un camp n'a plus d'armée, une avance de 50 suffit.",
+    "voirAussi": [
+      "guerre",
+      "siege",
+      "treve"
+    ]
+  },
+  {
+    "id": "treve",
+    "titre": "La trêve",
+    "texte": "À la fin d'une guerre, les deux camps sont liés par une trêve de dix ans : impossible de se déclarer la guerre pendant ce temps. Le vainqueur gagne du prestige ; un attaquant repoussé paie un tribut (30 % de son or).",
+    "voirAussi": [
+      "guerre"
+    ]
   }
 ]

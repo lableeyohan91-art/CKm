@@ -14,8 +14,8 @@ import { avis, concerneJoueur, notifier } from '../systems/monde';
 export type Valeur = string | number | boolean;
 export type Params = Record<string, Valeur>;
 export interface C { sim: SimContext; r: Regles; w: World }
-export type Categorie = 'famille' | 'relations' | 'vassaux' | 'diplomatie' | 'justice';
-export const CATEGORIES: Record<Categorie, string> = { famille: 'Famille', relations: 'Relations', vassaux: 'Vassaux et conseil', diplomatie: 'Diplomatie', justice: 'Justice' };
+export type Categorie = 'famille' | 'relations' | 'vassaux' | 'diplomatie' | 'guerre' | 'justice';
+export const CATEGORIES: Record<Categorie, string> = { famille: 'Famille', relations: 'Relations', vassaux: 'Vassaux et conseil', diplomatie: 'Diplomatie', guerre: 'Guerre', justice: 'Justice' };
 
 export interface Option { valeur: Valeur; label: string }
 export interface Parametre { id: string; nom: string; options: (c: C, a: Character, cible: Character) => Option[] }

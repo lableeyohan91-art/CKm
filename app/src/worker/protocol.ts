@@ -7,7 +7,7 @@ export type Demande =
   | { quoi: 'carte' } | { quoi: 'fiche'; id: number } | { quoi: 'jouables' } | { quoi: 'dynastie'; id: number }
   | { quoi: 'chronique'; filtre: 'tout' | 'joueur' } | { quoi: 'notifications' } | { quoi: 'ia'; id?: number } | { quoi: 'stats' }
   | { quoi: 'interactions'; cible: number } | { quoi: 'evaluer'; id: string; cible: number; params: Record<string, string | number | boolean> }
-  | { quoi: 'propositions' };
+  | { quoi: 'propositions' } | { quoi: 'guerre' };
 
 export type ToWorker =
   | { type: 'nouvelle'; seed: string }
@@ -21,7 +21,8 @@ export type ToWorker =
   | { type: 'exporter'; requestId: number; label: string }
   | { type: 'demande'; requestId: number; demande: Demande }
   | { type: 'interagir'; requestId: number; id: string; cible: number; params: Record<string, string | number | boolean> }
-  | { type: 'repondre'; requestId: number; proposition: number; accepte: boolean };
+  | { type: 'repondre'; requestId: number; proposition: number; accepte: boolean }
+  | { type: 'ordre'; requestId: number; armee: number; vers: string | null };
 
 /** Vue envoyée à l'interface : jamais l'état complet, seulement ce qu'il faut afficher. */
 export interface WorldView {
@@ -39,6 +40,9 @@ export interface WorldView {
   enCours: boolean;
   notifNonLues: number;
   propositions: number;
+  /** nombre de guerres en cours dans le monde, et celles du joueur */
+  guerres: number;
+  mesGuerres: number;
   finDePartie?: string;
   vivants: number;
 }

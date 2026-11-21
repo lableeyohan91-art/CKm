@@ -30,7 +30,7 @@ export function construireMonde(seed: string, data: GameData): World {
     const royaume = sc.titres.royaumes.find((k) => k.duches.includes(du.id))?.id;
     w.titres[du.id] = { id: du.id, nom: du.nom, rang: 'duche', succession: du.succession, historique: [], ...(royaume ? { parentDeJure: royaume } : {}) };
     for (const cid of du.comtes) {
-      w.titres[`c-${cid}`] = { id: `c-${cid}`, nom: `Comté de ${w.comtes[cid]!.nom}`, rang: 'comte', comteId: cid,
+      w.titres[`c-${cid}`] = { id: `c-${cid}`, nom: `Comté ${de(w.comtes[cid]!.nom)}`, rang: 'comte', comteId: cid,
         succession: sc.titres.successionComtes, historique: [], parentDeJure: du.id };
     }
   }
@@ -60,6 +60,7 @@ export function construireMonde(seed: string, data: GameData): World {
     const c = parCle.get(p.id)!;
     for (const t of p.titres ?? []) donnerTitre(w, t, c);
     if (p.suzerain) c.suzerainId = parCle.get(p.suzerain)!.id;
+    if (p.revendications) c.revendications = p.revendications.map((x) => ({ ...x }));
     if (p.cour && c.titres.length === 0) c.courId = parCle.get(p.cour)!.id;
     if (p.conjoint && c.conjointId === undefined) {
       const x = parCle.get(p.conjoint)!;
@@ -136,3 +137,6 @@ export function tirerTraits(ctx: SimContext, ids: string[], r: Regles, n: number
   }
   return out;
 }
+
+/** « de Paris », « d'Évreux ». */
+export const de = (nom: string): string => (/^[AEIOUYÉÈÊaeiouy]/.test(nom) ? `d'${nom}` : `de ${nom}`);

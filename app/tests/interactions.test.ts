@@ -88,15 +88,18 @@ describe('moteur d’interactions', () => {
     if (ev.possible) { expect(ev.acceptation!.accepte).toBe(false); expect(ev.acceptation!.parts.some((p) => p.valeur < 0)).toBe(true); }
   });
 
-  it('migration v2 → v3 : une ancienne sauvegarde se recharge', async () => {
+  it('migration v2 → v4 : une ancienne sauvegarde se recharge', async () => {
     const { w } = partie('migration');
     const save = toSaveFile(w, 'v2');
     const ancien = JSON.parse(JSON.stringify(save));
     ancien.schemaVersion = 2; ancien.world.schemaVersion = 2;
-    for (const k of ['conseils', 'alliances', 'prets', 'propositions']) delete ancien.world[k];
+    for (const k of ['conseils', 'alliances', 'prets', 'propositions', 'guerres', 'armees', 'treves', 'occupations']) delete ancien.world[k];
+    for (const c of Object.values(ancien.world.personnages) as { revendications?: unknown }[]) delete c.revendications;
     const s = await decodeSave(new TextEncoder().encode(JSON.stringify(ancien)));
-    expect(s.schemaVersion).toBe(3);
+    expect(s.schemaVersion).toBe(4);
     expect(s.world.alliances).toEqual([]);
+    expect(s.world.guerres).toEqual([]);
+    expect(Object.values(s.world.personnages).every((c) => Array.isArray(c.revendications))).toBe(true);
     expect((await decodeSave(await encodeSave(save))).world.conseils).toBeDefined();
   });
 });

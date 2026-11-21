@@ -3,8 +3,9 @@ import { loadData } from '../data/load';
 import { toCalendar } from '../engine/calendar';
 import { addMonths, exportGame, formatDate, isFirstOfMonth, isFirstOfYear, loadGame, newGame, type Partie } from './game';
 import type { Demande, FromWorker, Speed, ToWorker, WorldView } from './protocol';
-import { resume, vueCarte, vueChronique, vueDynastie, vueEvaluer, vueFiche, vueIA, vueInteractions, vueJouables, vuePropositions, vueStats } from './vues';
+import { resume, vueCarte, vueChronique, vueDynastie, vueEvaluer, vueFiche, vueIA, vueInteractions, vueJouables, vuePropositions, vueStats, vueGuerre } from './vues';
 import { executer, repondre as repondreProposition, type C } from '../interactions';
+import { ordonnerMarche } from '../systems/guerre';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -30,6 +31,7 @@ function view(): WorldView | null {
     day: w.day, dateLabel: formatDate(w.day), mois: c.year * 12 + c.month, paused, speed, seed: w.seed,
     daysSimulated: w.stats.daysSimulated, measuredDaysPerSec: Math.round(measured),
     joueur: j ? resume(w, j) : null, enCours: w.flags.enCours === true, notifNonLues: Math.max(0, w.notifications.length - notifLues), propositions: w.propositions.length,
+    guerres: w.guerres.length, mesGuerres: w.joueurId === null ? 0 : w.guerres.filter((g) => g.attaquants.includes(w.joueurId!) || g.defenseurs.includes(w.joueurId!)).length,
     ...(w.finDePartie ? { finDePartie: w.finDePartie } : {}), vivants: w.vivants.length,
   };
 }
@@ -76,6 +78,7 @@ function repondre(d: Demande): unknown {
     case 'interactions': return vueInteractions(partie, d.cible);
     case 'evaluer': return vueEvaluer(partie, d.id, d.cible, d.params);
     case 'propositions': return vuePropositions(partie);
+    case 'guerre': return vueGuerre(partie);
   }
 }
 
@@ -129,6 +132,18 @@ self.onmessage = async (e: MessageEvent<ToWorker>) => {
         const a = w.joueurId !== null ? w.personnages[w.joueurId] : undefined, cible = w.personnages[m.cible];
         const res = a && cible ? executer(c, m.id, a, cible, m.params) : { ok: false, texte: 'Personnage introuvable.' };
         notifLues = w.notifications.length; importantesVues = w.notifications.filter((x) => x.important).length;
+        post({ type: 'reponse', requestId: m.requestId, data: res });
+        break;
+      }
+      case 'ordre': {
+        if (!partie) break;
+        const w = partie.sim.world;
+        const a = w.armees.find((x) => x.id === m.armee);
+        let res: { ok: boolean; texte: string };
+        if (!a || a.proprietaire !== w.joueurId) res = { ok: false, texte: 'Cette armée ne vous obéit pas.' };
+        else if (m.vers === null) { delete a.manuel; res = { ok: true, texte: 'Votre maréchal reprend le commandement de cette armée.' }; }
+        else if (ordonnerMarche(w, partie.regles, a, m.vers)) { a.manuel = true; res = { ok: true, texte: `En marche vers ${w.comtes[m.vers]!.nom} (${a.chemin.length} étape${a.chemin.length > 1 ? 's' : ''}).` }; }
+        else res = { ok: false, texte: 'Aucun chemin vers ce comté.' };
         post({ type: 'reponse', requestId: m.requestId, data: res });
         break;
       }

@@ -2,3 +2,4 @@
 import './famille';
 import './autres';
 export * from './moteur';
+import './guerre';

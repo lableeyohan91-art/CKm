@@ -264,3 +264,56 @@ export function vuePropositions(p: Partie) {
     ...(typeof x.params.membre === 'number' && w.personnages[x.params.membre] ? { membre: resume(w, w.personnages[x.params.membre]!) } : {}),
   }));
 }
+
+// ------------------------------------------------------------------ guerre
+
+export interface ArmeeVue {
+  id: number; proprietaire: PersoResume; commandant?: string; hommes: number; hommesMax: number; moral: number;
+  comte: string; chemin: string[]; destination?: string; siege?: { comte: string; pct: number; jours: number };
+  relation: 'mienne' | 'amie' | 'ennemie' | 'neutre'; manuel: boolean; guerre: string;
+}
+export interface GuerreVue {
+  id: number; nom: string; titre: string; debut: string; mois: number;
+  attaquants: PersoResume[]; defenseurs: PersoResume[]; score: number; monCamp: 'att' | 'def' | null;
+  scoreParts: Part[]; hommes: { att: number; def: number }; chef: boolean; adversaire?: number;
+}
+export interface VueGuerre { armees: ArmeeVue[]; occupations: { comte: string; camp: 'att' | 'def'; relation: 'amie' | 'ennemie' | 'neutre' }[]; guerres: GuerreVue[] }
+
+export function vueGuerre(p: Partie): VueGuerre {
+  const w = p.sim.world;
+  const j = w.joueurId;
+  const campDe = (gid: number | undefined, id: number) => { const g = w.guerres.find((x) => x.id === gid); return g ? (g.attaquants.includes(id) ? 'att' : g.defenseurs.includes(id) ? 'def' : null) : null; };
+  const relation = (gid: number | undefined, cp: 'att' | 'def' | null): 'amie' | 'ennemie' | 'neutre' => {
+    if (j === null || !cp) return 'neutre';
+    const moi = campDe(gid, j);
+    return !moi ? 'neutre' : moi === cp ? 'amie' : 'ennemie';
+  };
+  const armees: ArmeeVue[] = w.armees.map((a) => {
+    const g = w.guerres.find((x) => x.id === a.guerre);
+    const cmd = perso(w, a.commandant);
+    return {
+      id: a.id, proprietaire: resume(w, w.personnages[a.proprietaire]!), ...(cmd ? { commandant: nomComplet(w, cmd) } : {}),
+      hommes: a.hommes, hommesMax: a.hommesMax, moral: Math.round(a.moral * 100), comte: a.comte, chemin: [...a.chemin],
+      ...(a.chemin.length ? { destination: a.chemin[a.chemin.length - 1] } : {}),
+      ...(a.siege ? { siege: { comte: a.siege.comte, pct: Math.round((a.siege.progres / a.siege.duree) * 100), jours: a.siege.duree - a.siege.progres } } : {}),
+      relation: a.proprietaire === j ? 'mienne' : relation(a.guerre, campDe(a.guerre, a.proprietaire)), manuel: !!a.manuel, guerre: g?.nom ?? '',
+    };
+  });
+  const occupations = Object.entries(w.occupations).map(([comte, o]) => ({ comte, camp: o.camp, relation: relation(o.guerre, o.camp) }));
+  const guerres: GuerreVue[] = w.guerres.map((g) => {
+    const monCamp = j === null ? null : g.attaquants.includes(j) ? 'att' : g.defenseurs.includes(j) ? 'def' : null;
+    const signe = monCamp === 'def' ? -1 : 1;
+    const occ = g.score - g.batailles;
+    const hommes = { att: 0, def: 0 };
+    for (const a of w.armees) if (a.guerre === g.id) { const cp = campDe(g.id, a.proprietaire); if (cp) hommes[cp] += a.hommes; }
+    const chef = j !== null && (g.attaquant === j || g.defenseur === j);
+    return {
+      id: g.id, nom: g.nom, titre: w.titres[g.titre]?.nom ?? g.titre, debut: formatDate(g.debut), mois: Math.floor((w.day - g.debut) / 30),
+      attaquants: g.attaquants.map((id) => resume(w, w.personnages[id]!)), defenseurs: g.defenseurs.map((id) => resume(w, w.personnages[id]!)),
+      score: g.score * signe, monCamp,
+      scoreParts: [{ source: 'Batailles', valeur: g.batailles * signe }, { source: 'Terres occupées', valeur: Math.round(occ) * signe }].filter((x) => x.valeur !== 0),
+      hommes, chef, ...(chef ? { adversaire: g.attaquant === j ? g.defenseur : g.attaquant } : {}),
+    };
+  });
+  return { armees, occupations, guerres };
+}

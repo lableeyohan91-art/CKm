@@ -88,5 +88,6 @@ export const PersonnagesSchema = z.array(z.object({
   batard: z.boolean().optional(), conjoint: z.string().optional(), traits: z.array(z.string()), innes: z.array(z.string()).optional(),
   culture: z.string(), titres: z.array(z.string()).optional(), suzerain: z.string().optional(), cour: z.string().optional(),
   clerc: z.boolean().optional(), competences: skillsPartial.optional(),
+  revendications: z.array(z.object({ titre: z.string(), forte: z.boolean(), origine: z.string() })).optional(),
 }));
 export type Personnages = z.infer<typeof PersonnagesSchema>;

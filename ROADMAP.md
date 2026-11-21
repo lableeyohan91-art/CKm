@@ -67,7 +67,14 @@ complots), religion (dispense, excommunication, pèlerinage, évêques).
 - Performances : mesurer sur un vrai téléphone (≈ 75 ms par année simulée
   sur serveur avec 700 personnages).
 
-## Phase 2 — Guerre (cœur demandé)
+## Phase 2 — Guerre (cœur demandé) — vague 1 ✅ v0.4.0
+**Vague 1 faite** : revendications (fortes, faibles, héritées, forgées), motifs de
+terres de droit, déclaration et appel des alliés, ost avec part des vassaux,
+marche au doigt (Manche comprise), batailles automatiques, sièges et occupations,
+ravitaillement et hiver, score, paix négociée, trêves, IA de guerre.
+**Vague 2 à faire** : troupes professionnelles et mercenaires, chevaliers,
+prisonniers et rançons, fusion et division des armées.
+
 Motifs de guerre, levées, compagnies, chevaliers, mercenaires ; déplacement au
 doigt ; ravitaillement, attrition, saisons ; batailles automatiques par phases ;
 sièges ; prisonniers et rançons ; score de guerre ; paix ; trêves ; IA de guerre

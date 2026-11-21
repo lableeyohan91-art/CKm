@@ -52,7 +52,7 @@ export function creerPersonnage(ctx: SimContext, p: NouveauPersonnage): Characte
     dynastieId: p.maisonId ? w.maisons[p.maisonId]?.dynastieId ?? null : null,
     sexe: p.sexe, naissance: p.naissance, anciensConjoints: [], enfants: [], cultureId: p.cultureId, religionId: p.religionId,
     competences: p.competences, traits: p.traits, sante: 5, tension: 0, prestige: 0, piete: 0, or: 0, titres: [],
-    opinions: [], memoires: [], portrait: ctx.rng.nextUint32(),
+    opinions: [], memoires: [], revendications: [], portrait: ctx.rng.nextUint32(),
     ...(p.surnom ? { surnom: p.surnom } : {}), ...(p.cle ? { cle: p.cle } : {}), ...(p.incertain ? { incertain: true } : {}),
     ...(p.pereId !== undefined ? { pereId: p.pereId } : {}), ...(p.mereId !== undefined ? { mereId: p.mereId } : {}),
     ...(p.batard ? { batard: true } : {}), ...(p.courId !== undefined ? { courId: p.courId } : {}),
@@ -119,6 +119,7 @@ export function donnerTitre(w: World, titreId: string, a: Character | undefined)
   if (last && last.a === undefined) last.a = w.day;
   if (a) {
     t.titulaireId = a.id; a.titres.push(titreId); t.historique.push({ id: a.id, de: w.day });
+    if (a.revendications.length) a.revendications = a.revendications.filter((x) => x.titre !== titreId);
     if (a.courId !== undefined) delete a.courId;
   } else delete t.titulaireId;
 }
@@ -144,6 +145,8 @@ export function mourir(ctx: SimContext, r: Regles, c: Character, cause: string):
 
   // Les courtisans et la famille du défunt rejoignent l'héritier (ou leur propre seigneur)
   const heritier = perso(w, succ?.principal);
+  transmettreGuerres(w, c, heritier);
+  transmettreRevendications(w, c, heritier);
   for (const id of w.vivants) {
     const x = w.personnages[id]!;
     if (x.courId === c.id) { if (heritier) x.courId = heritier.id; else delete x.courId; }
@@ -161,6 +164,37 @@ export function mourir(ctx: SimContext, r: Regles, c: Character, cause: string):
     } else {
       w.joueurId = null; w.finDePartie = `Votre dynastie ne possède plus aucune terre après la mort de ${nomComplet(w, c)}.`;
       notifier(w, w.finDePartie, true, [c.id]);
+    }
+  }
+}
+
+/** L'héritier reprend les guerres et les armées du défunt. */
+function transmettreGuerres(w: World, c: Character, h: Character | undefined): void {
+  for (const g of w.guerres) {
+    const liste = g.attaquants.includes(c.id) ? g.attaquants : g.defenseurs.includes(c.id) ? g.defenseurs : null;
+    if (!liste) continue;
+    liste.splice(liste.indexOf(c.id), 1);
+    const reprend = h && !g.attaquants.includes(h.id) && !g.defenseurs.includes(h.id) && (g.attaquant === c.id || g.defenseur === c.id || h.titres.length > 0);
+    if (h && reprend) liste.push(h.id);
+    if (h && g.attaquant === c.id) g.attaquant = h.id;
+    if (h && g.defenseur === c.id) g.defenseur = h.id;
+    for (const a of w.armees) if (a.guerre === g.id && a.proprietaire === c.id) { if (h && liste.includes(h.id)) a.proprietaire = h.id; }
+    w.armees = w.armees.filter((a) => a.proprietaire !== c.id);
+  }
+  for (const a of w.armees) if (a.commandant === c.id) delete a.commandant;
+}
+
+/** Les revendications fortes passent à l'héritier principal (affaiblies pour les autres fils). */
+function transmettreRevendications(w: World, c: Character, h: Character | undefined): void {
+  for (const rv of c.revendications) {
+    if (!rv.forte) continue;
+    for (const id of c.enfants) {
+      const k = w.personnages[id];
+      if (!k || k.deces !== undefined || k.horsScene !== undefined || k.batard || k.clerc) continue;
+      if (w.titres[rv.titre]?.titulaireId === k.id || k.revendications.some((x) => x.titre === rv.titre)) continue;
+      const principal = h?.id === k.id;
+      if (!principal && k.sexe !== 'h') continue;
+      k.revendications.push({ titre: rv.titre, forte: principal, origine: `Héritée de ${c.prenom}` });
     }
   }
 }
@@ -233,6 +267,8 @@ export function appliquerSuccession(ctx: SimContext, r: Regles, defunt: Characte
       const k = w.personnages[id]!;
       if (vivant(k) && k.id !== aine.id && k.sexe === 'h' && !k.batard && !k.clerc) {
         memoriser(k, 'desherite', w.day, `Écarté de l'héritage au profit de ${nomComplet(w, aine)}`, aine.id, 1);
+        const tp = titrePrincipal(w, aine);
+        if (tp && !k.revendications.some((x) => x.titre === tp)) k.revendications.push({ titre: tp, forte: false, origine: `Fils écarté de ${defunt.prenom}` });
       }
     }
   }

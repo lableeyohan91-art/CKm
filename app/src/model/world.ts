@@ -1,6 +1,6 @@
 import type { Day } from '../engine/calendar';
 import type { RngState } from '../engine/rng';
-import type { Alliance, Character, County, Dynasty, House, Notification, Poste, Pret, Proposition, Relation, Title } from './entities';
+import type { Alliance, Armee, Character, County, Dynasty, Guerre, House, Notification, Poste, Pret, Proposition, Relation, Title, Treve } from './entities';
 
 /** Élément de la file datée : un traitement à exécuter à une date précise. */
 export interface ScheduledItem {
@@ -55,7 +55,14 @@ export interface World {
   alliances: Alliance[];
   prets: Pret[];
   propositions: Proposition[];
+
+  // --- v4 : guerre ---
+  guerres: Guerre[];
+  armees: Armee[];
+  treves: Treve[];
+  /** Occupation militaire par comté : identifiant de la guerre et camp occupant */
+  occupations: Record<string, { guerre: number; camp: 'att' | 'def' }>;
 }
 
-/** v1 : version d'essai 0.0.1 (monde vide). v2 : monde vivant (phase 1). v3 : interactions. */
-export const WORLD_SCHEMA_VERSION = 3;
+/** v1 : version d'essai 0.0.1 (monde vide). v2 : monde vivant (phase 1). v3 : interactions. v4 : guerre. */
+export const WORLD_SCHEMA_VERSION = 4;

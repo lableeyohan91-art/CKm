@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## [0.4.0] — Guerre, vague 1
+
+### Ajouté
+- **Revendications** : historiques (Guillaume et Edgar sur l'Angleterre, Tostig,
+  Foulques, Robert le Frison), fils écartés d'un héritage (faibles), titres
+  révoqués sans motif ou perdus à la guerre (fortes), transmission à l'héritier.
+- Interactions **Déclarer la guerre** (motif au choix), **Proposer la paix**
+  (blanche, reddition, capitulation) et **Forger une revendication** (chancelier).
+- **Ost** : levée du domaine et part des vassaux selon leur opinion ; commandant
+  (vous ou votre maréchal). Les alliés sont appelés ; refuser est une trahison.
+- **Armées sur la carte** : touchez votre armée puis un comté. Traversée de la
+  Manche. Le maréchal la mène seul tant que vous ne donnez pas d'ordre.
+- **Batailles** automatiques (hommes, moral, talent du commandant, terrain,
+  hasard), commandants tués ou capturés ; **sièges** selon les fortifications,
+  occupations ; ravitaillement, hiver, renforts et solde.
+- **Score de guerre**, victoire automatique, transfert du titre (et des comtés
+  de droit d'un duché ou royaume), tribut, **trêves** de dix ans. L'héritier
+  reprend la guerre d'un chef mort.
+- **IA de guerre** : déclarer selon le rapport de forces, forger des
+  revendications, manœuvrer (attaquer plus faible, fuir plus fort, assiéger),
+  négocier la paix.
+- Onglet **Guerre** (score expliqué, camps, armées), 8 fiches de glossaire.
+- Sauvegardes au format 4 (migration automatique).
+
+### Modifié
+- « Comté d'Évreux », « Comté d'Arras »… (élision).
+
 ## [0.3.1] — Trahisons
 
 ### Ajouté

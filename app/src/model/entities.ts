@@ -15,7 +15,7 @@ export type SuccessionLaw = 'partage' | 'primogeniture';
 export interface OpinionMod { cible: number; valeur: number; jusqua?: Day; raison: string }
 
 export type MemoryKind = 'mort-proche' | 'mariage' | 'cadeau-recu' | 'desherite' | 'heritage' | 'naissance-enfant' | 'veuvage'
-  | 'fiancailles' | 'titre-recu' | 'spolie' | 'emprisonne' | 'libere' | 'exil' | 'execution' | 'amitie' | 'reconciliation' | 'pupille' | 'conseil' | 'pret' | 'trahison';
+  | 'fiancailles' | 'titre-recu' | 'spolie' | 'emprisonne' | 'libere' | 'exil' | 'execution' | 'amitie' | 'reconciliation' | 'pupille' | 'conseil' | 'pret' | 'trahison' | 'intrigue' | 'guerre';
 /** Souvenir : base des conséquences à long terme et des explications. */
 export interface Memory { type: MemoryKind; jour: Day; autre?: number; intensite: number; texte: string }
 
@@ -59,6 +59,7 @@ export interface Character {
   tuteurId?: number;            // précepteur d'un enfant : oriente son éducation
   educationVoulue?: SkillId;    // orientation choisie par le parent
   prisonnierDe?: number;        // geôlier
+  revendications: Revendication[];
 
   opinions: OpinionMod[];
   memoires: Memory[];
@@ -108,3 +109,41 @@ export interface Alliance { a: number; b: number; depuis: Day }
 export interface Pret { id: number; creancier: number; debiteur: number; montant: number; echeance: Day }
 /** Proposition faite au joueur par un autre personnage, en attente de réponse. */
 export interface Proposition { id: number; jour: Day; jusqua: Day; interaction: string; acteur: number; cible: number; params: Record<string, string | number | boolean>; texte: string }
+
+/** Prétention sur un titre : forte (héritable, motif de guerre sûr) ou faible. */
+export interface Revendication { titre: string; forte: boolean; origine: string }
+
+export type MotifGuerre = 'revendication' | 'dejure';
+export interface Guerre {
+  id: number;
+  nom: string;
+  attaquant: number;            // chef de guerre
+  defenseur: number;
+  motif: MotifGuerre;
+  titre: string;                // titre disputé
+  pour?: number;                // bénéficiaire (si différent de l'attaquant)
+  debut: Day;
+  attaquants: number[];         // participants (chef compris)
+  defenseurs: number[];
+  score: number;                // −100 (défenseurs vainqueurs) à +100 (attaquants vainqueurs)
+  batailles: number;            // apport cumulé des batailles au score
+  occupations: Record<string, 'att' | 'def'>;   // comtés occupés par l'autre camp
+}
+
+export interface Armee {
+  id: number;
+  proprietaire: number;
+  commandant?: number;
+  hommes: number;
+  hommesMax: number;
+  moral: number;                // 0 à 1
+  comte: string;                // position
+  chemin: string[];             // comtés restant à parcourir
+  progres: number;              // jours passés sur l'étape en cours
+  siege?: { comte: string; progres: number; duree: number };
+  guerre?: number;
+  /** le joueur a donné un ordre : son maréchal cesse de mener l’armée seul */
+  manuel?: boolean;
+}
+
+export interface Treve { a: number; b: number; jusqua: Day }

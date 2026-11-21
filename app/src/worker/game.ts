@@ -10,6 +10,8 @@ import { systemesEconomie } from '../systems/economie';
 import { systemesRelations } from '../systems/relations';
 import { systemesLiens } from '../systems/liens';
 import { systemeIA } from '../ai/ia';
+import { systemesGuerre } from '../systems/guerre';
+import { systemeIAGuerre } from '../ai/guerre';
 import { JournalIA } from '../ai/journal';
 
 export interface Partie { sim: Simulation; regles: Regles; journal: JournalIA }
@@ -36,6 +38,8 @@ export function build(world: World, data: GameData = loadData()): Partie {
   systemesRelations(sim, regles);
   systemesLiens(sim, regles);
   systemeIA(sim, regles, journal);
+  systemesGuerre(sim, regles);
+  systemeIAGuerre(sim, regles);
   return { sim, regles, journal };
 }
 
