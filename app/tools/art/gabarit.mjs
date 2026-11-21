@@ -26,8 +26,8 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" 
   ${ligne(640, 'Ligne des yeux', '#9b2a1e')}
   ${ligne(880, 'Menton', '#9b2a1e')}
   ${ligne(1050, 'Épaules', '#9b2a1e')}
-  <rect x="192" y="260" width="640" height="640" fill="none" stroke="#3f7a46" stroke-width="4"/>
-  <text x="200" y="300" font-family="sans-serif" font-size="26" fill="#3f7a46">Cadrage petit portrait (carré)</text>
+  <rect x="212" y="290" width="600" height="600" fill="none" stroke="#3f7a46" stroke-width="4"/>
+  <text x="220" y="330" font-family="sans-serif" font-size="26" fill="#3f7a46">Cadrage petit portrait (carré)</text>
   <rect x="152" y="240" width="720" height="900" fill="none" stroke="#b0821e" stroke-width="4" stroke-dasharray="4 6"/>
   <text x="160" y="1125" font-family="sans-serif" font-size="26" fill="#b0821e">Cadrage fiche personnage (4:5)</text>
   <text x="${W / 2}" y="1480" font-family="sans-serif" font-size="34" fill="#2b1d14" text-anchor="middle">GABARIT 1024 x 1536 — vue de face — axe vertical x=512</text>

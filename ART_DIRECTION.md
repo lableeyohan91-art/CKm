@@ -104,7 +104,7 @@ tonsure et l'habit remplacent les autres choix pour les religieux.
 
 ### Cadrages utilisés par le jeu
 
-- Petit portrait (listes, arbre) : carré x 192→832, y 260→900.
+- Petit portrait (listes, arbre) : carré x 212→812, y 290→890.
 - Fiche personnage : 4:5, x 152→872, y 240→1140.
 
 Ces zones sont dessinées sur le gabarit : rien d'important ne doit en sortir.

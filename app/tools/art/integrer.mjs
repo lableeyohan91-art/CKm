@@ -20,6 +20,39 @@ function fichiers(dir) {
   });
 }
 
+/**
+ * Préparation selon la catégorie :
+ * - barbe : retire les lèvres éventuellement peintes (pixels roses saturés), qui appartiennent au visage ;
+ * - calques recolorables (cheveux, étoffes) : passage en gris neutre puis étirement des valeurs,
+ *   pour que la recoloration par multiplication donne aussi bien du blond que du noir.
+ */
+async function preparer(source, a) {
+  if (a.teinte !== 'cheveux' && a.teinte !== 'etoffe') return sharp(source).png().toBuffer();
+  const { data, info } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const lum = new Float32Array(info.width * info.height);
+  const vals = [];
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const r = data[i] / 255, g = data[i + 1] / 255, b = data[i + 2] / 255;
+    if (a.categorie === 'barbe') {
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2;
+      const sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+      const rouge = r >= g && r >= b && (r - b) > 0.12 && (r - g) > 0.1;
+      if (rouge && sat > 0.28 && l > 0.42) { data[i + 3] = 0; continue; }
+    }
+    lum[p] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (data[i + 3] > 128) vals.push(lum[p]);
+  }
+  vals.sort((x, y) => x - y);
+  const bas = vals[Math.floor(vals.length * 0.02)] ?? 0, haut = vals[Math.floor(vals.length * 0.98)] ?? 1;
+  const cibleBas = 0.18, cibleHaut = 0.95;
+  for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+    const t = Math.min(1, Math.max(0, (lum[p] - bas) / Math.max(0.01, haut - bas)));
+    const v = Math.round((cibleBas + t * (cibleHaut - cibleBas)) * 255);
+    data[i] = data[i + 1] = data[i + 2] = v;
+  }
+  return sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
+}
+
 const parId = new Map(fichiers(src).map((p) => [basename(p, extname(p)).toLowerCase(), p]));
 const connus = new Set(catalogue.assets.map((a) => a.id));
 const manifeste = { version: 1, assets: {} };
@@ -39,7 +72,8 @@ for (const a of catalogue.assets) {
   const echelle = r.echelle ?? 1;
   const lw = Math.round(f.largeur * echelle), lh = Math.round(f.hauteur * echelle);
   const fond = f.transparent ? { r: 0, g: 0, b: 0, alpha: 0 } : { r: 0, g: 0, b: 0, alpha: 1 };
-  const pose = await sharp(source).resize(lw, lh, { fit: 'contain', background: fond }).png().toBuffer();
+  const prepare = await preparer(source, a);
+  const pose = await sharp(prepare).resize(lw, lh, { fit: 'contain', background: fond }).png().toBuffer();
   const left = Math.round((f.largeur - lw) / 2 + (r.dx ?? 0)), top = Math.round((f.hauteur - lh) / 2 + (r.dy ?? 0));
   const toile = await sharp({ create: { width: f.largeur, height: f.hauteur, channels: 4, background: fond } })
     .composite([{ input: pose, left: Math.max(-lw, left), top: Math.max(-lh, top) }]).png().toBuffer();
@@ -48,7 +82,7 @@ for (const a of catalogue.assets) {
     const rel = `art/${a.categorie}/${a.id}-${w}.webp`;
     const out = join(dest, a.categorie, `${a.id}-${w}.webp`);
     mkdirSync(dirname(out), { recursive: true });
-    if (!existsSync(out) || statSync(out).mtimeMs < statSync(source).mtimeMs || r.dx || r.dy || r.echelle) {
+    {
       await sharp(toile).resize(w, h).webp({ quality: 82, alphaQuality: 90, effort: 5 }).toFile(out);
     }
     sorties[w] = rel;

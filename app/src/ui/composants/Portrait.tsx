@@ -33,7 +33,7 @@ function teinter(img: HTMLImageElement, couleur: string, force: number): HTMLCan
   return c;
 }
 
-function PortraitCalques({ calques, taille, mort }: { calques: Calque[]; taille: number; mort: boolean }) {
+function PortraitCalques({ calques, taille, mort, graine }: { calques: Calque[]; taille: number; mort: boolean; graine: number }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     let annule = false;
@@ -45,16 +45,18 @@ function PortraitCalques({ calques, taille, mort }: { calques: Calque[]; taille:
       cv.width = px; cv.height = px;
       const g = cv.getContext('2d')!;
       g.clearRect(0, 0, px, px);
+      // Fond uni par défaut tant qu'aucun calque « fond » n'est disponible
+      if (!calques.some((c) => c.id.startsWith('fond-'))) { g.fillStyle = FONDS[(graine >>> 0) % FONDS.length]!; g.fillRect(0, 0, px, px); }
       imgs.forEach((img, i) => {
         const c = calques[i]!;
         const src = c.teinte ? teinter(img, c.teinte, c.force) : img;
-        // cadrage carré du gabarit : x 192→832, y 260→900 sur une toile 1024×1536
+        // cadrage carré du gabarit : x 212→812, y 290→890 sur une toile 1024×1536
         const k = img.naturalWidth / 1024;
-        g.drawImage(src, 192 * k, 260 * k, 640 * k, 640 * k, 0, 0, px, px);
+        g.drawImage(src, 212 * k, 290 * k, 600 * k, 600 * k, 0, 0, px, px);
       });
     }).catch(() => {});
     return () => { annule = true; };
-  }, [calques, taille]);
+  }, [calques, taille, graine]);
   return <canvas ref={ref} width={taille} height={taille} role="img" aria-hidden="true"
     style={{ width: taille, height: taille, borderRadius: 10, flex: 'none', filter: mort ? 'grayscale(1)' : undefined }} />;
 }
@@ -69,7 +71,7 @@ export function Portrait({ graine, sexe, age, rang, taille = 56, mort = false, a
   { graine: number; sexe: 'h' | 'f'; age: number; rang: number; taille?: number; mort?: boolean; app?: Apparence }) {
   const m = useManifeste();
   const calques = m && app ? choisirCalques(app, m) : null;
-  if (calques) return <PortraitCalques calques={calques} taille={taille} mort={mort} />;
+  if (calques) return <PortraitCalques calques={calques} taille={taille} mort={mort} graine={graine} />;
 
   const r = rand(graine);
   const peau = PEAUX[Math.floor(r() * PEAUX.length)]!;

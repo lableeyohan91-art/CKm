@@ -20,37 +20,37 @@ Légende : ✅ intégrée · ⬜ à produire
 
 | | Identifiant (nom du fichier) | Catégorie | Format | Recoloration |
 |---|---|---|---|---|
-| ⬜ | `visage-h-adulte-1.png` | Visages | 1024×1536, fond transparent | teinte de peau ajustée en jeu |
-| ⬜ | `cheveux-h-court.png` | Cheveux | 1024×1536, fond transparent | recoloré en jeu (couleur de cheveux) |
-| ⬜ | `barbe-courte.png` | Barbes | 1024×1536, fond transparent | recoloré en jeu (couleur de cheveux) |
-| ⬜ | `vetement-h-tunique.png` | Vêtements | 1024×1536, fond transparent | recoloré en jeu (couleur de la maison) |
-| ⬜ | `couronne-royale.png` | Couronnes | 1024×1536, fond transparent | — |
+| ✅ | `visage-h-adulte-1.png` | Visages | 1024×1536, fond transparent | teinte de peau ajustée en jeu |
+| ✅ | `cheveux-h-court.png` | Cheveux | 1024×1536, fond transparent | recoloré en jeu (couleur de cheveux) |
+| ✅ | `barbe-courte.png` | Barbes | 1024×1536, fond transparent | recoloré en jeu (couleur de cheveux) |
+| ✅ | `vetement-h-tunique.png` | Vêtements | 1024×1536, fond transparent | recoloré en jeu (couleur de la maison) |
+| ✅ | `couronne-royale.png` | Couronnes | 1024×1536, fond transparent | — |
 
-### ⬜ `visage-h-adulte-1.png`
+### ✅ `visage-h-adulte-1.png`
 
 ```text
 Realistic medieval portrait painting set in Western Europe around 1066 (Norman and Anglo-Saxon era). Refined egg-tempera and oil panel technique with a subtle illuminated-manuscript influence, fine visible brushwork, soft warm light from the upper left, earthy natural palette (ochre, umber, madder red, woad blue, verdigris green). Historically accurate: no plate armour, no Renaissance or Gothic fashion, no modern elements. LAYER ASSET for a layered character-portrait system. Canvas exactly 1024x1536 pixels, portrait orientation, fully transparent background (PNG with alpha channel). Front view, the person looks straight at the viewer. Match EXACTLY the position, scale and proportions of the attached template image gabarit-portrait.png (head centred horizontally at x=512, top of skull at y=380, eye line at y=640, chin at y=880, shoulders at y=1050). Draw ONLY the element described below and nothing else: no background, no frame, no text, no extra body parts. Element: the bare head, ears, neck and upper chest skin of a man of about 38, oval face, straight nose, calm neutral expression, fair European skin tone. The head is completely BALD and CLEAN-SHAVEN (hair and beard are separate layers), no clothing, no jewellery. Neck and chest end cleanly at the shoulder line so clothing layers can cover them.
 ```
 
-### ⬜ `cheveux-h-court.png`
+### ✅ `cheveux-h-court.png`
 
 ```text
 Realistic medieval portrait painting set in Western Europe around 1066 (Norman and Anglo-Saxon era). Refined egg-tempera and oil panel technique with a subtle illuminated-manuscript influence, fine visible brushwork, soft warm light from the upper left, earthy natural palette (ochre, umber, madder red, woad blue, verdigris green). Historically accurate: no plate armour, no Renaissance or Gothic fashion, no modern elements. LAYER ASSET for a layered character-portrait system. Canvas exactly 1024x1536 pixels, portrait orientation, fully transparent background (PNG with alpha channel). Front view, the person looks straight at the viewer. Match EXACTLY the position, scale and proportions of the attached template image gabarit-portrait.png (head centred horizontally at x=512, top of skull at y=380, eye line at y=640, chin at y=880, shoulders at y=1050). Draw ONLY the element described below and nothing else: no background, no frame, no text, no extra body parts. Element: the hair only of an adult man: short cropped hair, Norman style. Paint this element in NEUTRAL GRAYSCALE ONLY (no hue at all, mid-gray values with natural highlights and shadows), because the game recolors it with multiply blending.
 ```
 
-### ⬜ `barbe-courte.png`
+### ✅ `barbe-courte.png`
 
 ```text
 Realistic medieval portrait painting set in Western Europe around 1066 (Norman and Anglo-Saxon era). Refined egg-tempera and oil panel technique with a subtle illuminated-manuscript influence, fine visible brushwork, soft warm light from the upper left, earthy natural palette (ochre, umber, madder red, woad blue, verdigris green). Historically accurate: no plate armour, no Renaissance or Gothic fashion, no modern elements. LAYER ASSET for a layered character-portrait system. Canvas exactly 1024x1536 pixels, portrait orientation, fully transparent background (PNG with alpha channel). Front view, the person looks straight at the viewer. Match EXACTLY the position, scale and proportions of the attached template image gabarit-portrait.png (head centred horizontally at x=512, top of skull at y=380, eye line at y=640, chin at y=880, shoulders at y=1050). Draw ONLY the element described below and nothing else: no background, no frame, no text, no extra body parts. Element: facial hair only: a short neat full beard and moustache. Paint this element in NEUTRAL GRAYSCALE ONLY (no hue at all, mid-gray values with natural highlights and shadows), because the game recolors it with multiply blending.
 ```
 
-### ⬜ `vetement-h-tunique.png`
+### ✅ `vetement-h-tunique.png`
 
 ```text
 Realistic medieval portrait painting set in Western Europe around 1066 (Norman and Anglo-Saxon era). Refined egg-tempera and oil panel technique with a subtle illuminated-manuscript influence, fine visible brushwork, soft warm light from the upper left, earthy natural palette (ochre, umber, madder red, woad blue, verdigris green). Historically accurate: no plate armour, no Renaissance or Gothic fashion, no modern elements. LAYER ASSET for a layered character-portrait system. Canvas exactly 1024x1536 pixels, portrait orientation, fully transparent background (PNG with alpha channel). Front view, the person looks straight at the viewer. Match EXACTLY the position, scale and proportions of the attached template image gabarit-portrait.png (head centred horizontally at x=512, top of skull at y=380, eye line at y=640, chin at y=880, shoulders at y=1050). Draw ONLY the element described below and nothing else: no background, no frame, no text, no extra body parts. Element: clothing only, covering the shoulders and upper chest down to the bottom of the canvas: a nobleman's wool tunic with a round neckline and a simple embroidered border. Leave the neck opening empty (the neck is on another layer). Paint this element in NEUTRAL GRAYSCALE ONLY (no hue at all, mid-gray values with natural highlights and shadows), because the game recolors it with multiply blending.
 ```
 
-### ⬜ `couronne-royale.png`
+### ✅ `couronne-royale.png`
 
 ```text
 Realistic medieval portrait painting set in Western Europe around 1066 (Norman and Anglo-Saxon era). Refined egg-tempera and oil panel technique with a subtle illuminated-manuscript influence, fine visible brushwork, soft warm light from the upper left, earthy natural palette (ochre, umber, madder red, woad blue, verdigris green). Historically accurate: no plate armour, no Renaissance or Gothic fashion, no modern elements. LAYER ASSET for a layered character-portrait system. Canvas exactly 1024x1536 pixels, portrait orientation, fully transparent background (PNG with alpha channel). Front view, the person looks straight at the viewer. Match EXACTLY the position, scale and proportions of the attached template image gabarit-portrait.png (head centred horizontally at x=512, top of skull at y=380, eye line at y=640, chin at y=880, shoulders at y=1050). Draw ONLY the element described below and nothing else: no background, no frame, no text, no extra body parts. Element: only the crown, resting on the head at the exact height of the template: an 11th-century royal crown: a gold band with four fleuron points and set gemstones. Polished gold, natural colours.
