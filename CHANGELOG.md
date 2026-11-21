@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## [0.3.1] — Trahisons
+
+### Ajouté
+- Notion commune de **trahison** : rancune permanente de la victime (transmise
+  à ses enfants), jugement de ses proches et alliés, tension du traître loyal,
+  alerte et pause pour le joueur trahi.
+- L'IA trahit selon son caractère : rompre une alliance devenue odieuse,
+  rompre des fiançailles pour un bien meilleur parti, emprisonner un vassal
+  haï puis le dépouiller (suzerains cruels ou fourbes, prudents face aux
+  vassaux puissants).
+
+### Modifié
+- Une aide en or ne peut être réclamée au même vassal qu'une fois tous les cinq ans.
+
 ## [0.3.0] — Interactions
 
 ### Ajouté

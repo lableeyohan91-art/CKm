@@ -2,7 +2,7 @@ import { SKILL_NAMES, type Character, type SkillId } from '../model/entities';
 import { chefDeFamille, empechements, interetMariage, rangFamille } from '../rules/mariage';
 import { opinionTotal } from '../rules/opinion';
 import { age, axe, competence, famillesProches, majeur, perso, rangMax, vivant, type Part } from '../rules/personnage';
-import { avis, marier, memoriser } from '../systems/monde';
+import { avis, marier, memoriser, trahir } from '../systems/monde';
 import { enregistrer, jusqua, n, notifierSiJoueur, type C, type Interaction, type Params } from './moteur';
 
 /** Membres de la famille dont l'acteur décide le mariage (lui-même et ses enfants à sa charge). */
@@ -89,7 +89,7 @@ const rompreFiancailles: Interaction = {
     const autre = c.w.personnages[cible.fianceId!]!;
     delete cible.fianceId; delete autre.fianceId; delete cible.fiancesMatrilineaire; delete autre.fiancesMatrilineaire;
     const chef = chefDeFamille(c.w, cible);
-    avis(chef, a.id, -25, 'A rompu les fiançailles de notre enfant', jusqua(c, 15));
+    trahir(c.w, a, chef, `a rompu les fiançailles promises à ${cible.prenom}`, 35);
     return `Les fiançailles de ${n(c, autre)} et ${n(c, cible)} sont rompues.`;
   },
 };

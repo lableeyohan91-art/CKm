@@ -15,7 +15,7 @@ export type SuccessionLaw = 'partage' | 'primogeniture';
 export interface OpinionMod { cible: number; valeur: number; jusqua?: Day; raison: string }
 
 export type MemoryKind = 'mort-proche' | 'mariage' | 'cadeau-recu' | 'desherite' | 'heritage' | 'naissance-enfant' | 'veuvage'
-  | 'fiancailles' | 'titre-recu' | 'spolie' | 'emprisonne' | 'libere' | 'exil' | 'execution' | 'amitie' | 'reconciliation' | 'pupille' | 'conseil' | 'pret';
+  | 'fiancailles' | 'titre-recu' | 'spolie' | 'emprisonne' | 'libere' | 'exil' | 'execution' | 'amitie' | 'reconciliation' | 'pupille' | 'conseil' | 'pret' | 'trahison';
 /** Souvenir : base des conséquences à long terme et des explications. */
 export interface Memory { type: MemoryKind; jour: Day; autre?: number; intensite: number; texte: string }
 

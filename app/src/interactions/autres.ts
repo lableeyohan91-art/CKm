@@ -1,7 +1,7 @@
 import { POSTES, POSTE_COMPETENCE, POSTE_NOMS, type Character, type Poste } from '../model/entities';
 import { opinionTotal } from '../rules/opinion';
 import { axe, comtesTenus, competence, famillesProches, majeur, nomComplet, perso, rangMax, titrePrincipal, vivant, type Part } from '../rules/personnage';
-import { avis, donnerTitre, memoriser, mourir } from '../systems/monde';
+import { avis, donnerTitre, memoriser, mourir, trahir } from '../systems/monde';
 import { enregistrer, jusqua, n, notifierSiJoueur, tyrannie, type C, type Interaction } from './moteur';
 
 const relation = (c: C, a: Character, b: Character, type?: 'ami' | 'rival') =>
@@ -154,7 +154,8 @@ const revoquerTitre: Interaction = {
     donnerTitre(c.w, t, a);
     const motive = cible.prisonnierDe === a.id;
     tyrannie(c, a, motive ? -5 : -20, `Tyrannie : a dépouillé ${cible.prenom} de ${nomT}`, [cible.id]);
-    avis(cible, a.id, -70, `M'a dépouillé de ${nomT}`);
+    if (motive) avis(cible, a.id, -50, `M'a dépouillé de ${nomT}`);
+    else trahir(c.w, a, cible, `m'a dépouillé de ${nomT} sans motif`, 70);
     memoriser(cible, 'spolie', c.w.day, `Dépouillé de ${nomT} par ${nomComplet(c.w, a)}`, a.id, 1);
     if (!cible.titres.length) {
       delete cible.suzerainId; cible.courId = a.id;
@@ -204,7 +205,12 @@ const aideOr: Interaction = {
   description: "Demander à votre vassal une contribution exceptionnelle. Les loyaux paient, les avares rechignent ; un refus vous fâchera.",
   visible: (c, a, cible) => estVassalDirect(a, cible),
   parametres: [{ id: 'part', nom: 'Montant', options: (c, a, cible) => [0.2, 0.4].map((x) => ({ valeur: x, label: `${Math.round(x * 100)} % de son trésor (${Math.floor(cible.or * x)} pièces)` })) }],
-  conditions: (c, a, cible) => (cible.or < 10 ? ['Son trésor est presque vide.'] : []),
+  conditions: (c, a, cible) => [
+    ...(cible.or < 10 ? ['Son trésor est presque vide.'] : []),
+    ...(cible.opinions.some((o) => o.cible === a.id && o.raison === 'Aide exceptionnelle versée' && (o.jusqua ?? 0) > c.w.day)
+      || a.opinions.some((o) => o.cible === cible.id && o.raison === "M'a refusé son aide" && (o.jusqua ?? 0) > c.w.day + 365 * 5)
+      ? ['Vous lui avez déjà réclamé une aide ces dernières années.'] : []),
+  ],
   decideur: (c, a, cible) => cible,
   acceptation: (c, a, cible, p) => [
     { source: 'Son opinion de vous', valeur: op(c, cible, a) / 2 },
@@ -260,7 +266,7 @@ const romprAlliance: Interaction = {
   cout: () => ({ prestige: 100 }),
   effets: (c, a, cible) => {
     c.w.alliances = c.w.alliances.filter((al) => !((al.a === a.id && al.b === cible.id) || (al.a === cible.id && al.b === a.id)));
-    avis(cible, a.id, -40, 'A rompu notre alliance', jusqua(c, 25));
+    trahir(c.w, a, cible, 'a rompu notre alliance', 40);
     return `L'alliance avec ${n(c, cible)} est rompue.`;
   },
 };
@@ -275,8 +281,8 @@ const emprisonner: Interaction = {
   visible: (c, a, cible) => peutJuger(a, cible) && cible.prisonnierDe === undefined,
   effets: (c, a, cible) => {
     cible.prisonnierDe = a.id;
-    if (cible.titres.length) tyrannie(c, a, -20, `Tyrannie : a emprisonné ${cible.prenom} sans motif`, [cible.id]);
-    avis(cible, a.id, -60, "M'a emprisonné");
+    if (cible.titres.length) { tyrannie(c, a, -20, `Tyrannie : a emprisonné ${cible.prenom} sans motif`, [cible.id]); trahir(c.w, a, cible, "m'a jeté au cachot sans motif", 60); }
+    else avis(cible, a.id, -60, "M'a emprisonné");
     memoriser(cible, 'emprisonne', c.w.day, `Emprisonné par ${nomComplet(c.w, a)}`, a.id, 1);
     for (const id of [cible.pereId, cible.mereId, cible.conjointId, ...cible.enfants]) { const k = perso(c.w, id); if (vivant(k) && k.id !== a.id) avis(k, a.id, -25, `A emprisonné ${cible.prenom}`, jusqua(c, 20)); }
     if (axe(c.r, a, 'compassion') > 0) a.tension += 15;

@@ -37,7 +37,7 @@ export function systemeIA(sim: Simulation, r: Regles, journal: JournalIA): void 
 function reflechir(ctx: SimContext, r: Regles, c: Character, celibs: Character[], journal: JournalIA): void {
   const options: Option[] = [{ action: 'attendre', score: SEUIL_ATTENTE, raisons: [{ source: 'Ne rien faire', valeur: SEUIL_ATTENTE }], executer: () => {} }];
   options.push(...optionsMariage(ctx, r, c, celibs), ...optionsCadeau(ctx, r, c), ...optionsReligion(ctx, r, c),
-    ...optionsDoterFils(ctx, r, c), ...optionsAideOr(ctx, r, c), ...optionsAlliance(ctx, r, c));
+    ...optionsDoterFils(ctx, r, c), ...optionsAideOr(ctx, r, c), ...optionsAlliance(ctx, r, c), ...optionsTrahison(ctx, r, c));
   options.sort((a, b) => b.score - a.score);
   const top = options.slice(0, 3).filter((o) => o.score >= options[0]!.score * 0.7);
   const choix = ctx.rng.weighted(top, (o) => o.score) ?? options[0]!;
@@ -168,8 +168,8 @@ function optionsAideOr(ctx: SimContext, r: Regles, c: Character): Option[] {
   const w = ctx.world;
   if (!c.titres.length || c.or > 5) return [];
   const riches = w.vivants.map((id) => w.personnages[id]!).filter((v) => v.suzerainId === c.id && v.titres.length && v.or >= 30).sort((a, b) => b.or - a.or);
-  const v = riches[0]; if (!v) return [];
   const ci: C = { sim: ctx, r, w };
+  const v = riches.find((x) => evaluer(ci, interaction('aide-or')!, c, x, { part: 0.2 }).possible); if (!v) return [];
   return [{ action: 'réclamer une aide en or', cible: v.id, score: 14 - c.or, raisons: [{ source: 'Trésor vide', valeur: 14 - Math.round(c.or) }], executer: () => { executer(ci, 'aide-or', c, v, { part: 0.2 }); } }];
 }
 
@@ -187,6 +187,95 @@ function optionsAlliance(ctx: SimContext, r: Regles, c: Character): Option[] {
   const op = opinionTotal(w, r, c, x);
   const score = 4 + op / 6 + (c.ambition === 'puissance' ? 4 : 0);
   return [{ action: 'proposer une alliance', cible: x.id, score, raisons: [{ source: `Opinion (${op})`, valeur: Math.round(op / 6) }, { source: 'Chercher des appuis', valeur: 4 }], executer: () => { executer(ci, 'alliance', c, x, {}); } }];
+}
+
+// ------------------------------------------------------------------ Trahisons
+
+/**
+ * Le caractère décide : un fourbe trahit volontiers, un loyal presque jamais.
+ * Toutes ces trahisons passent par les interactions communes (mêmes coûts, mêmes conséquences).
+ */
+export function optionsTrahison(ctx: SimContext, r: Regles, c: Character): Option[] {
+  const w = ctx.world;
+  const ci: C = { sim: ctx, r, w };
+  const loyaute = axe(r, c, 'loyaute');                         // +2 loyal, −2 fourbe
+  const out: Option[] = [];
+
+  // 1. Rompre une alliance devenue odieuse
+  for (const al of w.alliances) {
+    if (al.a !== c.id && al.b !== c.id) continue;
+    const allie = w.personnages[al.a === c.id ? al.b : al.a]!;
+    const op = opinionTotal(w, r, c, allie);
+    if (op > -15 || c.prestige < 100) continue;
+    const raisons: Part[] = [
+      { source: `Mépris pour ${allie.prenom} (${op})`, valeur: Math.round(-op / 3) },
+      { source: loyaute < 0 ? 'Fourberie' : 'Loyauté', valeur: loyaute < 0 ? -loyaute * 5 : -loyaute * 12 },
+      { source: 'Le déshonneur d’une rupture', valeur: -6 },
+    ];
+    out.push({ action: 'rompre une alliance', cible: allie.id, score: raisons.reduce((s, x) => s + x.valeur, 0), raisons,
+      executer: () => { executer(ci, 'rompre-alliance', c, allie, {}); } });
+  }
+
+  // 2. Rompre des fiançailles pour un meilleur parti
+  if (ctx.rng.chance(0.06)) {
+    for (const id of c.enfants) {
+      const k = w.personnages[id]!;
+      if (!vivant(k) || k.fianceId === undefined || chefDeFamille(w, k).id !== c.id) continue;
+      const promis = w.personnages[k.fianceId]!;
+      const actuel = interetMariage(w, r, c, k, promis).score;
+      const pool = w.vivants.map((x) => w.personnages[x]!).filter((x) => x.sexe !== k.sexe && x.fianceId === undefined && x.conjointId === undefined && !x.clerc && !majeur(w, x) && x.id !== promis.id);
+      let mieux: { cand: Character; score: number } | undefined;
+      for (let i = 0; i < Math.min(15, pool.length); i++) {
+        const cand = pool[ctx.rng.int(0, pool.length - 1)]!;
+        const sc = interetMariage(w, r, c, k, cand).score;
+        if (mieux && sc <= mieux.score) continue;
+        // on évalue le nouveau parti comme si la promesse actuelle était déjà rompue
+        const promesse: number | undefined = k.fianceId;
+        delete k.fianceId;
+        const ev = evaluer(ci, interaction('fiancailles')!, c, cand, { membre: k.id, matrilineaire: false });
+        k.fianceId = promesse;
+        if (!ev.possible || ev.decideur?.id === w.joueurId || !ev.acceptation?.accepte) continue;
+        mieux = { cand, score: sc };
+      }
+      if (!mieux) continue;
+      const gain = mieux.score - actuel;
+      const raisons: Part[] = [
+        { source: 'Meilleur parti trouvé', valeur: Math.round((gain - 15) / 2) },
+        { source: loyaute < 0 ? 'Fourberie' : 'Parole donnée', valeur: loyaute < 0 ? -loyaute * 3 : -12 - loyaute * 10 },
+        { source: 'Ambition', valeur: c.ambition === 'puissance' ? 5 : 0 },
+      ];
+      const m = mieux;
+      out.push({ action: 'rompre des fiançailles', cible: promis.id, score: raisons.reduce((s, x) => s + x.valeur, 0), raisons,
+        executer: () => {
+          if (executer(ci, 'rompre-fiancailles', c, promis, {}).ok) executer(ci, 'fiancailles', c, m.cand, { membre: k.id, matrilineaire: false });
+        } });
+      break;
+    }
+  }
+
+  // 3. Le suzerain cruel ou fourbe jette au cachot un vassal qu'il hait, puis le dépouille
+  for (const id of w.vivants) {
+    const v = w.personnages[id]!;
+    if (v.suzerainId !== c.id || !v.titres.length) continue;
+    if (v.prisonnierDe === c.id) {
+      const raisons: Part[] = [{ source: 'Prisonnier à sa merci', valeur: 6 }, { source: 'Avidité', valeur: axe(r, c, 'cupidite') * 3 + (c.ambition === 'puissance' ? 4 : 0) }, { source: 'Compassion', valeur: -axe(r, c, 'compassion') * 4 }];
+      const titre = v.titres[v.titres.length - 1]!;
+      out.push({ action: 'dépouiller un vassal emprisonné', cible: v.id, score: raisons.reduce((s, x) => s + x.valeur, 0), raisons,
+        executer: () => { executer(ci, 'revoquer-titre', c, v, { titre }); } });
+      continue;
+    }
+    const op = opinionTotal(w, r, c, v);
+    if (op > -40) continue;
+    const raisons: Part[] = [
+      { source: `Haine envers ${v.prenom} (${op})`, valeur: Math.round((-op - 30) / 3) },
+      { source: 'Cruauté', valeur: -axe(r, c, 'compassion') * 4 },
+      { source: loyaute < 0 ? 'Fourberie' : 'Respect du serment', valeur: loyaute < 0 ? -loyaute * 3 : -6 - loyaute * 6 },
+      { source: 'Prudence (puissance du vassal)', valeur: -comtesTenus(w, v).length * 3 - axe(r, c, 'raison') * 2 },
+    ];
+    out.push({ action: 'emprisonner un vassal haï', cible: v.id, score: raisons.reduce((s, x) => s + x.valeur, 0), raisons,
+      executer: () => { executer(ci, 'emprisonner', c, v, {}); } });
+  }
+  return out;
 }
 
 // ------------------------------------------------------------------ Vœux religieux

@@ -93,6 +93,23 @@ export function marier(ctx: SimContext, a: Character, b: Character, matrilineair
   if (concerneJoueur(w, [h.id, f.id])) notifier(w, `${nomComplet(w, h)} épouse ${nomComplet(w, f)}.`, false, [h.id, f.id]);
 }
 
+/**
+ * Trahison : la victime garde une rancune permanente (transmise à ses enfants),
+ * ses proches et alliés jugent le traître, et un traître loyal de caractère en souffre.
+ */
+export function trahir(w: World, traitre: Character, victime: Character, texte: string, gravite = 50): void {
+  avis(victime, traitre.id, -gravite, `M'a trahi : ${texte}`);
+  memoriser(victime, 'trahison', w.day, `Trahi par ${nomComplet(w, traitre)} : ${texte}`, traitre.id, 1);
+  const temoins = new Set<number>([victime.pereId, victime.mereId, victime.conjointId, ...victime.enfants].filter((x): x is number => x !== undefined));
+  for (const a of w.alliances) { if (a.a === victime.id) temoins.add(a.b); if (a.b === victime.id) temoins.add(a.a); }
+  for (const id of temoins) {
+    const t = w.personnages[id];
+    if (t && t.deces === undefined && t.horsScene === undefined && t.id !== traitre.id) avis(t, traitre.id, -Math.round(gravite / 4), `A trahi ${victime.prenom}`, addYears(w.day, 15));
+  }
+  if (traitre.traits.includes('loyal')) traitre.tension += 25;
+  if (concerneJoueur(w, [victime.id]) && w.joueurId !== traitre.id) notifier(w, `Trahison ! ${nomComplet(w, traitre)} : ${texte}.`, true, [traitre.id, victime.id]);
+}
+
 /** Donne un titre à un personnage (sans gérer la vassalité). */
 export function donnerTitre(w: World, titreId: string, a: Character | undefined): void {
   const t = w.titres[titreId]!;

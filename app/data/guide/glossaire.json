@@ -269,7 +269,8 @@
     "texte": "Tout ce que vous pouvez faire envers un personnage : marier, offrir, nommer, emprisonner… Chaque interaction indique son coût et, quand quelqu'un doit accepter, sa réponse prévue avec chaque raison (pour et contre). Elle accepte si le total dépasse 0. Les autres personnages utilisent exactement les mêmes règles envers vous.",
     "voirAussi": [
       "opinion",
-      "conseil"
+      "conseil",
+      "trahison"
     ]
   },
   {
@@ -294,6 +295,16 @@
     "texte": "Agir contre son caractère use : un seigneur compatissant qui emprisonne ou fait exécuter accumule de la tension. Elle aura bientôt des conséquences sur sa santé et son comportement.",
     "voirAussi": [
       "traits"
+    ]
+  },
+  {
+    "id": "trahison",
+    "titre": "La trahison",
+    "texte": "Rompre une alliance ou des fiançailles, dépouiller ou emprisonner sans motif un vassal : ce sont des trahisons. La victime vous en voudra toute sa vie, et ses enfants hériteront de sa rancune ; ses proches et ses alliés vous jugeront aussi. Les autres personnages trahissent selon leur caractère : un fourbe le fait volontiers, un loyal presque jamais (et il en souffre).",
+    "voirAussi": [
+      "opinion",
+      "memoire",
+      "interactions"
     ]
   }
 ]
