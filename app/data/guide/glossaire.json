@@ -262,5 +262,38 @@
     "voirAussi": [
       "ambition"
     ]
+  },
+  {
+    "id": "interactions",
+    "titre": "Les interactions",
+    "texte": "Tout ce que vous pouvez faire envers un personnage : marier, offrir, nommer, emprisonner… Chaque interaction indique son coût et, quand quelqu'un doit accepter, sa réponse prévue avec chaque raison (pour et contre). Elle accepte si le total dépasse 0. Les autres personnages utilisent exactement les mêmes règles envers vous.",
+    "voirAussi": [
+      "opinion",
+      "conseil"
+    ]
+  },
+  {
+    "id": "conseil",
+    "titre": "Le conseil",
+    "texte": "Cinq postes confiés à des courtisans, vassaux ou à votre conjoint. Chancelier : améliore l'opinion de vos vassaux et mène vos émissaires. Intendant : augmente vos revenus selon sa gestion. Chapelain : augmente votre piété. Maréchal et maître-espion serviront avec la guerre et les intrigues. Être nommé flatte ; être renvoyé vexe.",
+    "voirAussi": [
+      "interactions"
+    ]
+  },
+  {
+    "id": "alliances",
+    "titre": "Alliances et dettes",
+    "texte": "Le mariage de vos enfants avec ceux d'un seigneur fait de vous des alliés ; vous pouvez aussi proposer une alliance directement. Les alliés se soutiendront dans les guerres. Un prêt se rembourse avec 20 % d'intérêt sous cinq ans : passé l'échéance, le prêteur vous en voudra durablement.",
+    "voirAussi": [
+      "interactions"
+    ]
+  },
+  {
+    "id": "tension",
+    "titre": "La tension",
+    "texte": "Agir contre son caractère use : un seigneur compatissant qui emprisonne ou fait exécuter accumule de la tension. Elle aura bientôt des conséquences sur sa santé et son comportement.",
+    "voirAussi": [
+      "traits"
+    ]
   }
 ]

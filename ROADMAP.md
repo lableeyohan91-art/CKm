@@ -56,10 +56,14 @@ Contenu : 30 comtés (France élargie, 1066), ~100 personnages, 8 à 12 dynastie
   tests de succession, de parenté, d'économie et de sauvegarde verts ; fluide
   sur téléphone.
 
+### Phase 1 bis — Interactions — ✅ première vague (v0.3.0)
+27 interactions sur un moteur commun au joueur et à l'IA (voir CHANGELOG).
+Prochaines vagues, avec leurs phases : guerre (déclarer, paix, rançon, appel
+aux armes, revendications), intrigues (espionnage, chantage, séduction,
+complots), religion (dispense, excommunication, pèlerinage, évêques).
+
 ### Reste à faire, reporté de la phase 1
-- Propositions de mariage faites **au** joueur et **par** le joueur (interface
-  de choix) : la simulation les gère déjà pour l'IA.
-- Conseil (5 postes) et conseiller qui guide le joueur.
+- Conseiller de cour qui commente la situation et suggère des actions.
 - Performances : mesurer sur un vrai téléphone (≈ 75 ms par année simulée
   sur serveur avec 700 personnages).
 

@@ -4,14 +4,16 @@ import type { Fiche as F } from '../../worker/vues';
 import { Explain, useGuide } from '../guide';
 import { PersoLien, Section, Valeur } from '../composants/communs';
 import { Portrait } from '../composants/Portrait';
+import { Interactions } from './Interactions';
 
 const AMBITIONS: Record<string, string> = { puissance: 'Accroître sa puissance', richesse: "S'enrichir", piete: 'Vivre pieusement', amitie: "Se faire des amis", famille: 'Fonder une grande famille' };
 const RANGS: Record<string, string> = { royaume: 'Royaume', duche: 'Duché', comte: 'Comté' };
 
-export function Fiche({ client, id, jour, onPerso }: { client: SimClient; id: number; jour: number; onPerso: (id: number) => void }) {
+export function Fiche({ client, id, jour, onPerso, joueurId = null, version = 0, onFait = () => {} }:
+  { client: SimClient; id: number; jour: number; onPerso: (id: number) => void; joueurId?: number | null; version?: number; onFait?: () => void }) {
   const [f, setF] = useState<F | null>(null);
   const { expliquer } = useGuide();
-  useEffect(() => { let ok = true; client.demander<F | null>({ quoi: 'fiche', id }).then((x) => { if (ok) setF(x); }); return () => { ok = false; }; }, [client, id, jour]);
+  useEffect(() => { let ok = true; client.demander<F | null>({ quoi: 'fiche', id }).then((x) => { if (ok) setF(x); }); return () => { ok = false; }; }, [client, id, jour, version]);
   if (!f) return <p className="muted">Chargement…</p>;
   const r = f.resume;
   const liste = (t: string, ps: { id: number }[] | undefined, aide?: string) => ps && ps.length > 0 && (
@@ -30,6 +32,14 @@ export function Fiche({ client, id, jour, onPerso }: { client: SimClient; id: nu
           {f.titres.length > 0 && <p>{f.titres.map((t) => t.nom).join(' · ')}</p>}
         </div>
       </section>
+
+      {f.prisonnierDe && <div className="note-alerte">Prisonnier de <button className="link" onClick={() => onPerso(f.prisonnierDe!.id)}>{f.prisonnierDe.nom}</button>.</div>}
+
+      {joueurId !== null && joueurId !== r.id && r.vivant && (
+        <Section titre="Interagir" aide={<Explain id="interactions" />}>
+          <Interactions client={client} cible={r.id} version={version + jour} onFait={onFait} />
+        </Section>
+      )}
 
       {(f.opinionDuJoueur || f.opinionEnversJoueur) && (
         <Section titre="Vous et lui" aide={<Explain id="opinion" />}>
@@ -50,6 +60,7 @@ export function Fiche({ client, id, jour, onPerso }: { client: SimClient; id: nu
           <dt>Prestige <Explain id="prestige" /></dt><dd>{f.prestige}</dd>
           <dt>Piété <Explain id="piete" /></dt><dd>{f.piete}</dd>
           {f.ambition && <><dt>Ambition <Explain id="ambition" /></dt><dd>{AMBITIONS[f.ambition] ?? f.ambition}</dd></>}
+          {f.tension > 0 && <><dt>Tension <Explain id="tension" /></dt><dd>{f.tension}</dd></>}
         </dl>
       </Section>
 
@@ -74,8 +85,29 @@ export function Fiche({ client, id, jour, onPerso }: { client: SimClient; id: nu
         </Section>
       )}
 
+      {f.conseil && (
+        <Section titre="Conseil" aide={<Explain id="conseil" />}>
+          {f.conseil.map((po) => (
+            <div key={po.poste} className="poste">
+              <span className="muted">{po.nom}</span>
+              {po.membre ? <PersoLien p={po.membre} onOpen={onPerso} /> : <span className="vacant">Poste vacant{r.joueur ? ' — ouvrez la fiche d’un courtisan pour le nommer' : ''}</span>}
+            </div>
+          ))}
+        </Section>
+      )}
+
+      {(f.allies.length > 0 || f.dettes.length > 0 || f.creances.length > 0) && (
+        <Section titre="Alliances et dettes" aide={<Explain id="alliances" />}>
+          {liste('Alliés', f.allies)}
+          {f.dettes.map((d, i) => <p key={`d${i}`}>Doit <b>{d.montant} or</b> à <button className="link" onClick={() => onPerso(d.envers.id)}>{d.envers.nom}</button> avant le {d.echeance}.</p>)}
+          {f.creances.map((d, i) => <p key={`c${i}`}><button className="link" onClick={() => onPerso(d.de.id)}>{d.de.nom}</button> lui doit <b>{d.montant} or</b> avant le {d.echeance}.</p>)}
+        </Section>
+      )}
+
       <Section titre="Famille">
         {f.conjoint && <><h3>Conjoint</h3><PersoLien p={f.conjoint} onOpen={onPerso} /></>}
+        {f.fiance && <><h3>Fiancé{f.fiance.sexe === 'f' ? 'e' : ''}</h3><PersoLien p={f.fiance} onOpen={onPerso} /></>}
+        {f.precepteur && <><h3>Précepteur</h3><PersoLien p={f.precepteur} onOpen={onPerso} /></>}
         {liste('Parents', f.parents)}
         {liste('Enfants', f.enfants)}
         {liste('Frères et sœurs', f.fratrie)}

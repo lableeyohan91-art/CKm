@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [0.3.0] — Interactions
+
+### Ajouté
+- **Moteur d'interactions** commun au joueur et à l'IA : conditions, coût,
+  décideur, acceptation calculée avec chacune de ses raisons (affichée avant
+  d'agir), effets immédiats et durables.
+- **27 interactions** — Famille : mariage (dont matrilinéaire), fiançailles,
+  rupture, légitimation d'un bâtard, orientation de l'éducation, précepteur,
+  pupille, inviter et renvoyer de la cour. Relations : cadeau, émissaire,
+  amitié, réconciliation, prêt, remboursement. Vassaux : accorder et révoquer
+  un comté, nommer et renvoyer au conseil, aide en or, libération du serment.
+  Diplomatie : alliance, rupture. Justice : emprisonner, libérer, exiler,
+  exécuter.
+- **Propositions au joueur** : l'IA vous propose mariages, fiançailles,
+  alliances, demandes d'aide ; réponse dans les Nouvelles (45 jours).
+- **Conseil** à cinq postes aux effets réels (chancelier, intendant, chapelain),
+  pourvu automatiquement par l'IA.
+- Conséquences durables : mariage des fiancés à 16 ans, alliances par
+  mariage, dettes échues, évasions, **rancunes transmises aux enfants**,
+  tyrannie aux yeux des vassaux, tension des seigneurs compatissants.
+- Fiche personnage : section « Interagir », conseil, alliés, dettes,
+  fiançailles, précepteur, captivité.
+
+### Modifié
+- Sauvegarde v3, avec migration automatique depuis la v2.
+- L'IA passe par le moteur d'interactions (mariages, fiançailles, cadeaux,
+  dotation des fils, aide en or, alliances).
+
 ## [0.2.0] — Carte réelle et direction artistique
 
 ### Ajouté

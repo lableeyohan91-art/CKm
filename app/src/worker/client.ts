@@ -31,6 +31,12 @@ export class SimClient {
     return new Promise((resolve) => { this.pending.set(requestId, resolve as (r: unknown) => void); this.send({ type: 'demande', requestId, demande }); });
   }
 
+  /** Envoie une commande qui attend un résultat (interagir, répondre). */
+  commande<T>(m: { type: 'interagir'; id: string; cible: number; params: Record<string, string | number | boolean> } | { type: 'repondre'; proposition: number; accepte: boolean }): Promise<T> {
+    const requestId = this.nextRequest++;
+    return new Promise((resolve) => { this.pending.set(requestId, resolve as (r: unknown) => void); this.send({ ...m, requestId } as ToWorker); });
+  }
+
   exportSave(label: string): Promise<{ bytes: Uint8Array; dateLabel: string }> {
     const requestId = this.nextRequest++;
     return new Promise((resolve) => { this.pending.set(requestId, resolve as (r: unknown) => void); this.send({ type: 'exporter', requestId, label }); });

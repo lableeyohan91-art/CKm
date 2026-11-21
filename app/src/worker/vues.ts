@@ -8,6 +8,8 @@ import {
 } from '../rules/personnage';
 import { heritierPrincipal, planSuccession } from '../rules/succession';
 import type { Partie } from './game';
+import { CATEGORIES, evaluer, interaction, parametresParDefaut, toutes, type C, type Params } from '../interactions';
+import { POSTES, POSTE_NOMS } from '../model/entities';
 
 /** Vues sérialisables envoyées à l'interface. Aucune règle ici : uniquement de la mise en forme. */
 
@@ -49,6 +51,11 @@ export interface Fiche {
   memoires: { date: string; texte: string }[];
   budget?: Valeur; heritier?: PersoResume; partage?: { titre: string; heritier: PersoResume }[];
   opinionDuJoueur?: Valeur; opinionEnversJoueur?: Valeur; vassaux: PersoResume[];
+  fiance?: PersoResume; prisonnierDe?: PersoResume; precepteur?: PersoResume; tension: number;
+  conseil?: { poste: string; nom: string; membre?: PersoResume }[];
+  allies: PersoResume[];
+  dettes: { envers: PersoResume; montant: number; echeance: string }[];
+  creances: { de: PersoResume; montant: number; echeance: string }[];
 }
 export interface Jouable { id: number; nom: string; titre: string; age: number; difficulte: 'Facile' | 'Moyenne' | 'Difficile'; description: string; portrait: number; sexe: 'h' | 'f'; app: Apparence }
 export interface Noeud { p: PersoResume; batard: boolean; conjoint?: PersoResume; enfants: Noeud[] }
@@ -126,6 +133,14 @@ export function vueFiche(p: Partie, id: number): Fiche | null {
       ? { partage: plan.attributions.map((a) => ({ titre: w.titres[a.titre]!.nom, heritier: resume(w, w.personnages[a.heritier]!) })) } : {}),
     ...(j && j.id !== c.id && vivantC ? { opinionDuJoueur: opinion(w, r, j, c), opinionEnversJoueur: opinion(w, r, c, j) } : {}),
     vassaux: w.vivants.map((x) => w.personnages[x]!).filter((v) => v.suzerainId === c.id && v.titres.length).map((v) => resume(w, v)),
+    ...(c.fianceId !== undefined ? { fiance: r1(w, c.fianceId) } : {}),
+    ...(c.prisonnierDe !== undefined ? { prisonnierDe: r1(w, c.prisonnierDe) } : {}),
+    ...(c.tuteurId !== undefined ? { precepteur: r1(w, c.tuteurId) } : {}),
+    tension: Math.round(c.tension),
+    ...(c.titres.length ? { conseil: POSTES.map((po) => ({ poste: po, nom: POSTE_NOMS[po], ...(w.conseils[c.id]?.[po] !== undefined ? { membre: r1(w, w.conseils[c.id]![po]) } : {}) })) } : {}),
+    allies: w.alliances.filter((a) => a.a === c.id || a.b === c.id).map((a) => resume(w, w.personnages[a.a === c.id ? a.b : a.a]!)),
+    dettes: w.prets.filter((x) => x.debiteur === c.id).map((x) => ({ envers: resume(w, w.personnages[x.creancier]!), montant: x.montant, echeance: formatDate(x.echeance) })),
+    creances: w.prets.filter((x) => x.creancier === c.id).map((x) => ({ de: resume(w, w.personnages[x.debiteur]!), montant: x.montant, echeance: formatDate(x.echeance) })),
   };
 }
 
@@ -194,4 +209,58 @@ export function vueStats(p: Partie) {
     ...w.stats,
     revenuTotal: Math.round(v.reduce((s, c) => s + revenuDomaine(w, c), 0) * 10) / 10,
   };
+}
+
+// ------------------------------------------------------------------ Interactions
+
+export interface EvaluationVue {
+  possible: boolean; raisons: string[]; cout: { or?: number; prestige?: number; piete?: number };
+  decideur?: PersoResume; acceptation?: { score: number; parts: Part[]; accepte: boolean }; versJoueur?: boolean;
+}
+export interface InteractionVue {
+  id: string; nom: string; categorie: string; categorieNom: string; description: string;
+  parametres: { id: string; nom: string; options: { valeur: string | number | boolean; label: string }[] }[];
+  params: Params; evaluation: EvaluationVue;
+}
+
+const ctxDe = (p: Partie): C => ({ sim: p.sim.context, r: p.regles, w: p.sim.world });
+
+function vueEvaluation(p: Partie, id: string, a: Character, cible: Character, params: Params): EvaluationVue {
+  const ev = evaluer(ctxDe(p), interaction(id)!, a, cible, params);
+  return {
+    possible: ev.possible, raisons: ev.raisons, cout: ev.cout,
+    ...(ev.decideur ? { decideur: resume(p.sim.world, ev.decideur) } : {}),
+    ...(ev.acceptation ? { acceptation: ev.acceptation } : {}),
+  };
+}
+
+/** Interactions visibles du joueur envers une cible, avec paramètres par défaut et évaluation. */
+export function vueInteractions(p: Partie, cibleId: number): InteractionVue[] {
+  const w = p.sim.world, c = ctxDe(p);
+  const a = w.joueurId !== null ? w.personnages[w.joueurId] : undefined, cible = w.personnages[cibleId];
+  if (!a || !cible || !vivant(a) || !vivant(cible)) return [];
+  return toutes().filter((it) => it.visible(c, a, cible)).map((it) => {
+    const params = parametresParDefaut(c, it, a, cible);
+    return {
+      id: it.id, nom: it.nom, categorie: it.categorie, categorieNom: CATEGORIES[it.categorie], description: it.description,
+      parametres: (it.parametres ?? []).map((prm) => ({ id: prm.id, nom: prm.nom, options: prm.options(c, a, cible) })),
+      params, evaluation: vueEvaluation(p, it.id, a, cible, params),
+    };
+  });
+}
+
+export function vueEvaluer(p: Partie, id: string, cibleId: number, params: Params): EvaluationVue | null {
+  const w = p.sim.world;
+  const a = w.joueurId !== null ? w.personnages[w.joueurId] : undefined, cible = w.personnages[cibleId];
+  if (!a || !cible) return null;
+  return vueEvaluation(p, id, a, cible, params);
+}
+
+export function vuePropositions(p: Partie) {
+  const w = p.sim.world;
+  return w.propositions.map((x) => ({
+    id: x.id, texte: x.texte, date: formatDate(x.jour), limite: formatDate(x.jusqua), interaction: interaction(x.interaction)?.nom ?? x.interaction,
+    acteur: resume(w, w.personnages[x.acteur]!), cible: resume(w, w.personnages[x.cible]!),
+    ...(typeof x.params.membre === 'number' && w.personnages[x.params.membre] ? { membre: resume(w, w.personnages[x.params.membre]!) } : {}),
+  }));
 }

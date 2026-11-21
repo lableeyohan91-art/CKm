@@ -31,6 +31,8 @@ export function App() {
   const [alerte, setAlerte] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [slotsVersion, setSlotsVersion] = useState(0);
+  const [version, setVersion] = useState(0);            // change après chaque interaction : rafraîchit les fiches
+  const fait = () => setVersion((v) => v + 1);
 
   useEffect(() => {
     const off = client.subscribe((m) => {
@@ -77,7 +79,7 @@ export function App() {
           <div className="row">
             <div className="date">{view?.dateLabel ?? 'Chargement…'}<small>{view?.joueur ? view.joueur.nom : 'Mode observateur'}</small></div>
             <button className="btn cloche" onClick={() => { setNotifs(!notifs); setFiche([]); }} aria-label={`Nouvelles (${view?.notifNonLues ?? 0} non lues)`} aria-pressed={notifs}>
-              ✉{!!view?.notifNonLues && <span className="pastille">{view.notifNonLues > 99 ? '99+' : view.notifNonLues}</span>}
+              ✉{!!((view?.notifNonLues ?? 0) + (view?.propositions ?? 0)) && <span className="pastille">{Math.min(99, (view?.notifNonLues ?? 0) + (view?.propositions ?? 0))}</span>}
             </button>
             <button className={`btn${paused ? ' primary' : ''}`} onClick={() => client.send({ type: 'pause', paused: !paused })}
               aria-label={paused ? 'Reprendre le temps' : 'Mettre en pause'}>{paused ? '▶' : '❚❚'}</button>
@@ -95,14 +97,14 @@ export function App() {
         <main className="gutter">
           {error && <div className="error" role="alert">{error} <button className="btn" onClick={() => setError(null)}>Fermer</button></div>}
           {view?.finDePartie && <div className="panel fin"><h2>Fin de la partie</h2><p>{view.finDePartie}</p><button className="btn primary" onClick={() => client.send({ type: 'nouvelle', seed: `partie-${Date.now().toString(36)}` })}>Nouvelle partie</button></div>}
-          {notifs ? <Notifications client={client} jour={jour} onPerso={ouvrir} />
+          {notifs ? <Notifications client={client} jour={jour} onPerso={ouvrir} version={version} onFait={fait} />
             : ficheId !== undefined ? (
               <>
                 <button className="btn" onClick={() => setFiche((f) => f.slice(0, -1))}>← Retour</button>
-                <Fiche client={client} id={ficheId} jour={jour} onPerso={ouvrir} />
+                <Fiche client={client} id={ficheId} jour={jour} onPerso={ouvrir} joueurId={joueurId} version={version} onFait={fait} />
               </>
             ) : onglet === 'carte' ? <Carte comtes={comtes} onPerso={ouvrir} joueurId={joueurId} />
-            : onglet === 'personnage' ? (joueurId !== null ? <Fiche client={client} id={joueurId} jour={jour} onPerso={ouvrir} /> : <p className="muted">Mode observateur : touchez un comté de la carte pour ouvrir la fiche de son seigneur.</p>)
+            : onglet === 'personnage' ? (joueurId !== null ? <Fiche client={client} id={joueurId} jour={jour} onPerso={ouvrir} joueurId={joueurId} version={version} onFait={fait} /> : <p className="muted">Mode observateur : touchez un comté de la carte pour ouvrir la fiche de son seigneur.</p>)
             : onglet === 'dynastie' ? <Dynastie client={client} id={joueurId} jour={jour} onPerso={ouvrir} />
             : onglet === 'chronique' ? <Chronique client={client} jour={jour} onPerso={ouvrir} joueur={joueurId !== null} />
             : view && <Plus client={client} view={view} onPerso={ouvrir} slotsVersion={slotsVersion} />}

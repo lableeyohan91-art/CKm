@@ -3,7 +3,8 @@ import { loadData } from '../data/load';
 import { toCalendar } from '../engine/calendar';
 import { addMonths, exportGame, formatDate, isFirstOfMonth, isFirstOfYear, loadGame, newGame, type Partie } from './game';
 import type { Demande, FromWorker, Speed, ToWorker, WorldView } from './protocol';
-import { resume, vueCarte, vueChronique, vueDynastie, vueFiche, vueIA, vueJouables, vueStats } from './vues';
+import { resume, vueCarte, vueChronique, vueDynastie, vueEvaluer, vueFiche, vueIA, vueInteractions, vueJouables, vuePropositions, vueStats } from './vues';
+import { executer, repondre as repondreProposition, type C } from '../interactions';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -28,7 +29,7 @@ function view(): WorldView | null {
   return {
     day: w.day, dateLabel: formatDate(w.day), mois: c.year * 12 + c.month, paused, speed, seed: w.seed,
     daysSimulated: w.stats.daysSimulated, measuredDaysPerSec: Math.round(measured),
-    joueur: j ? resume(w, j) : null, enCours: w.flags.enCours === true, notifNonLues: Math.max(0, w.notifications.length - notifLues),
+    joueur: j ? resume(w, j) : null, enCours: w.flags.enCours === true, notifNonLues: Math.max(0, w.notifications.length - notifLues), propositions: w.propositions.length,
     ...(w.finDePartie ? { finDePartie: w.finDePartie } : {}), vivants: w.vivants.length,
   };
 }
@@ -72,6 +73,9 @@ function repondre(d: Demande): unknown {
     case 'notifications': { const w = partie.sim.world; return [...w.notifications].reverse().map((n) => ({ ...n, date: formatDate(n.jour) })); }
     case 'ia': return vueIA(partie, d.id);
     case 'stats': return vueStats(partie);
+    case 'interactions': return vueInteractions(partie, d.cible);
+    case 'evaluer': return vueEvaluer(partie, d.id, d.cible, d.params);
+    case 'propositions': return vuePropositions(partie);
   }
 }
 
@@ -118,6 +122,24 @@ self.onmessage = async (e: MessageEvent<ToWorker>) => {
         break;
       }
       case 'demande': post({ type: 'reponse', requestId: m.requestId, data: repondre(m.demande) }); return;
+      case 'interagir': {
+        if (!partie) break;
+        const w = partie.sim.world;
+        const c: C = { sim: partie.sim.context, r: partie.regles, w };
+        const a = w.joueurId !== null ? w.personnages[w.joueurId] : undefined, cible = w.personnages[m.cible];
+        const res = a && cible ? executer(c, m.id, a, cible, m.params) : { ok: false, texte: 'Personnage introuvable.' };
+        notifLues = w.notifications.length; importantesVues = w.notifications.filter((x) => x.important).length;
+        post({ type: 'reponse', requestId: m.requestId, data: res });
+        break;
+      }
+      case 'repondre': {
+        if (!partie) break;
+        const w = partie.sim.world;
+        const res = repondreProposition({ sim: partie.sim.context, r: partie.regles, w }, m.proposition, m.accepte);
+        importantesVues = w.notifications.filter((x) => x.important).length;
+        post({ type: 'reponse', requestId: m.requestId, data: res });
+        break;
+      }
     }
   } catch (err) {
     post({ type: 'erreur', message: err instanceof Error ? err.message : String(err) });
