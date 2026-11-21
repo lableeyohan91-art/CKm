@@ -1,10 +1,10 @@
-import { addYears } from '../engine/calendar';
 import type { Simulation, SimContext } from '../engine/sim';
 import type { Character } from '../model/entities';
-import { fertiliteAge } from '../systems/demographie';
-import { avis, creerPersonnage, marier, memoriser, competencesNaissance, concerneJoueur, notifier } from '../systems/monde';
+import { creerPersonnage, marier, competencesNaissance, concerneJoueur, notifier } from '../systems/monde';
 import { opinionTotal } from '../rules/opinion';
-import { age, axe, consanguins, majeur, nomComplet, perso, pertinent, rangMax, vivant, type Part } from '../rules/personnage';
+import { age, axe, comtesTenus, majeur, nomComplet, perso, pertinent, vivant, type Part } from '../rules/personnage';
+import { chefDeFamille, estHeritierPrincipal, interetMariage } from '../rules/mariage';
+import { evaluer, executer, interaction, type C } from '../interactions';
 import type { Regles } from '../rules/regles';
 import { tirerTraits } from '../scenario/build';
 import type { JournalIA } from './journal';
@@ -28,7 +28,7 @@ export function systemeIA(sim: Simulation, r: Regles, journal: JournalIA): void 
     const celibs = celibataires(ctx);
     for (const id of penseurs) {
       const c = w.personnages[id]!;
-      if (!vivant(c) || !majeur(w, c)) continue;
+      if (!vivant(c) || !majeur(w, c) || c.prisonnierDe !== undefined) continue;
       reflechir(ctx, r, c, celibs, journal);
     }
   } });
@@ -36,7 +36,8 @@ export function systemeIA(sim: Simulation, r: Regles, journal: JournalIA): void 
 
 function reflechir(ctx: SimContext, r: Regles, c: Character, celibs: Character[], journal: JournalIA): void {
   const options: Option[] = [{ action: 'attendre', score: SEUIL_ATTENTE, raisons: [{ source: 'Ne rien faire', valeur: SEUIL_ATTENTE }], executer: () => {} }];
-  options.push(...optionsMariage(ctx, r, c, celibs), ...optionsCadeau(ctx, r, c), ...optionsReligion(ctx, r, c));
+  options.push(...optionsMariage(ctx, r, c, celibs), ...optionsCadeau(ctx, r, c), ...optionsReligion(ctx, r, c),
+    ...optionsDoterFils(ctx, r, c), ...optionsAideOr(ctx, r, c), ...optionsAlliance(ctx, r, c));
   options.sort((a, b) => b.score - a.score);
   const top = options.slice(0, 3).filter((o) => o.score >= options[0]!.score * 0.7);
   const choix = ctx.rng.weighted(top, (o) => o.score) ?? options[0]!;
@@ -45,95 +46,63 @@ function reflechir(ctx: SimContext, r: Regles, c: Character, celibs: Character[]
   choix.executer();
 }
 
-// ------------------------------------------------------------------ Mariages
+// ------------------------------------------------------------------ Mariages et fiançailles
 
-/** Liste des célibataires mariables du jour (calculée une fois par jour). */
+/** Liste des célibataires du jour (calculée une fois par jour). */
 function celibataires(ctx: SimContext): Character[] {
   const w = ctx.world;
-  return w.vivants.map((id) => w.personnages[id]!).filter((x) => x.conjointId === undefined && !x.clerc && majeur(w, x) && (x.sexe === 'h' || age(w, x) <= 40));
+  return w.vivants.map((id) => w.personnages[id]!).filter((x) => x.conjointId === undefined && x.fianceId === undefined && !x.clerc && x.prisonnierDe === undefined && (x.sexe === 'h' || age(w, x) <= 40));
 }
 
-/** Qui décide du mariage d'un personnage : son père vivant, sinon sa mère titrée, sinon lui-même. */
-export function tuteur(w: SimContext['world'], c: Character): Character {
-  if (c.titres.length) return c;
-  const p = perso(w, c.pereId); if (vivant(p)) return p;
-  const m = perso(w, c.mereId); if (vivant(m) && m.titres.length) return m;
-  return c;
-}
-
-/** Rang de la famille : celui du chef de famille (0 à 3). */
-const rangFamille = (w: SimContext['world'], c: Character) => Math.max(rangMax(w, c), rangMax(w, tuteur(w, c)));
-
-const estHeritierPrincipal = (w: SimContext['world'], c: Character): boolean => {
-  const p = perso(w, c.pereId);
-  if (!vivant(p) || !p.titres.length) return c.titres.length > 0;
-  const fils = p.enfants.map((id) => w.personnages[id]!).filter((k) => vivant(k) && k.sexe === 'h' && !k.batard && !k.clerc).sort((a, b) => a.naissance - b.naissance);
-  return fils[0]?.id === c.id;
-};
-
-/** Intérêt d'un mariage entre `dep` et `cand`, vu par le décideur `pour`. */
-export function interetMariage(ctx: SimContext, r: Regles, pour: Character, dep: Character, cand: Character): { score: number; raisons: Part[] } {
-  const w = ctx.world;
-  const raisons: Part[] = [];
-  const add = (source: string, v: number) => { if (v) raisons.push({ source, valeur: Math.round(v) }); };
-  const poidsRang = (pour.ambition === 'puissance' ? 1.5 : 1) * (dep.titres.length || estHeritierPrincipal(w, dep) ? 1.3 : 1);
-  add('Rang de sa famille', rangFamille(w, cand) * 12 * poidsRang);
-  const femme = cand.sexe === 'f' ? cand : dep;
-  add('Âge pour avoir des enfants', fertiliteAge(age(w, femme)) * 15 * (pour.ambition === 'famille' ? 1.4 : 1));
-  const ecart = Math.abs(age(w, dep) - age(w, cand));
-  if (ecart > 10) add("Différence d'âge", -(ecart - 10));
-  const tuteurCand = tuteur(w, cand);
-  if (tuteurCand.id !== pour.id) add('Opinion de sa famille', opinionTotal(w, r, pour, tuteurCand) / 5);
-  for (const [t, v] of [['beau', 5], ['laid', -5], ['genie', 8], ['lent', -6], ['chetif', -5], ['robuste', 4]] as const) if (cand.traits.includes(t)) add(r.innes.get(t)!.nom, v);
-  if (cand.cultureId === dep.cultureId) add('Même culture', 3);
-  if (cand.titres.length) add('Possède des terres', 10 * poidsRang);
-  return { score: raisons.reduce((s, x) => s + x.valeur, 0), raisons };
-}
+export const tuteur = chefDeFamille;
 
 function optionsMariage(ctx: SimContext, r: Regles, c: Character, celibs: Character[]): Option[] {
   const w = ctx.world;
+  const ci: C = { sim: ctx, r, w };
   const dependants = [c, ...c.enfants.map((id) => w.personnages[id]!)]
-    .filter((d) => vivant(d) && d.conjointId === undefined && !d.clerc && majeur(w, d) && tuteur(w, d).id === c.id && (d.sexe === 'h' || age(w, d) <= 40) && pertinent(w, d));
+    .filter((d) => vivant(d) && d.conjointId === undefined && d.fianceId === undefined && !d.clerc && chefDeFamille(w, d).id === c.id
+      && (d.sexe === 'h' || age(w, d) <= 40) && pertinent(w, d) && (majeur(w, d) || age(w, d) >= 6));
   const out: Option[] = [];
   for (const dep of dependants.slice(0, 2)) {
-    const pool = celibs.filter((x) => x.sexe !== dep.sexe && x.religionId === dep.religionId && x.id !== dep.id);
-    let meilleur: { cand: Character; score: number; raisons: Part[] } | undefined;
+    const fiance = !majeur(w, dep);
+    if (fiance && !ctx.rng.chance(0.25)) continue;                // les fiançailles ne pressent pas
+    const id = fiance ? 'fiancailles' : 'mariage';
+    const pool = celibs.filter((x) => x.sexe !== dep.sexe && x.religionId === dep.religionId && x.id !== dep.id && majeur(w, x) !== fiance && (!fiance || age(w, x) >= 4));
+    let meilleur: { cand: Character; score: number; raisons: Part[]; matri: boolean } | undefined;
     for (let i = 0; i < Math.min(40, pool.length); i++) {
       const cand = pool[ctx.rng.int(0, pool.length - 1)]!;
-      if (cand.conjointId !== undefined || consanguins(w, dep, cand)) continue;
-      const tc = tuteur(w, cand);
-      if (tc.id === w.joueurId) continue;                 // les propositions au joueur arriveront avec l'interface
-      const it = interetMariage(ctx, r, c, dep, cand);
+      const it = interetMariage(w, r, c, dep, cand);
       if (meilleur && it.score <= meilleur.score) continue;
-      // La famille d'en face accepte-t-elle ?
-      const accept = interetMariage(ctx, r, tc, cand, dep).score + opinionTotal(w, r, tc, c) / 5 - Math.max(0, rangFamille(w, cand) - rangFamille(w, dep)) * 10;
-      if (accept < 8) continue;
-      meilleur = { cand, ...it };
+      const matri = dep.sexe === 'f' && estHeritiere(w, dep);
+      const ev = evaluer(ci, interaction(id)!, c, cand, { membre: dep.id, matrilineaire: matri });
+      if (!ev.possible) continue;
+      const versJoueur = ev.decideur?.id === w.joueurId;
+      if (!versJoueur && !ev.acceptation?.accepte) continue;
+      if (versJoueur && (w.propositions.some((x) => x.acteur === c.id) || !ctx.rng.chance(0.3))) continue;
+      meilleur = { cand, ...it, matri };
     }
-    const urgence = dep.sexe === 'h' ? 0.8 + 0.05 * Math.max(0, age(w, dep) - 18) : 1 + 0.1 * Math.max(0, age(w, dep) - 16);
+    const urgence = fiance ? 0.6 : dep.sexe === 'h' ? 0.8 + 0.05 * Math.max(0, age(w, dep) - 18) : 1 + 0.1 * Math.max(0, age(w, dep) - 16);
     if (meilleur && meilleur.score >= 12) {
       const m = meilleur;
       const raisons = [...m.raisons, { source: 'Urgence (âge)', valeur: Math.round((urgence - 1) * m.score) }];
-      out.push({ action: dep.id === c.id ? 'se marier' : 'marier un enfant', cible: m.cand.id, score: m.score * urgence, raisons,
-        executer: () => celebrer(ctx, r, dep, m.cand) });
-    } else if (dep.titres.length || estHeritierPrincipal(w, dep)) {
+      out.push({ action: fiance ? 'fiancer un enfant' : dep.id === c.id ? 'se marier' : 'marier un enfant', cible: m.cand.id, score: m.score * urgence, raisons,
+        executer: () => { executer(ci, id, c, m.cand, { membre: dep.id, matrilineaire: m.matri }); } });
+    } else if (!fiance && (dep.titres.length || estHeritierPrincipal(w, dep))) {
       // Faute de parti convenable, une union dans la petite noblesse assure la lignée
       const s = 8 + Math.max(0, age(w, dep) - 20) * 1.5;
       out.push({ action: 'épouser dans la petite noblesse', score: s, raisons: [{ source: 'Assurer la descendance', valeur: Math.round(s) }],
-        executer: () => celebrer(ctx, r, dep, genererConjoint(ctx, r, dep)) });
+        executer: () => { const conj = genererConjoint(ctx, r, dep); marier(ctx, dep, conj, dep.sexe === 'f' && estHeritiere(w, dep)); } });
     }
   }
   return out;
 }
 
-function celebrer(ctx: SimContext, r: Regles, a: Character, b: Character): void {
-  const w = ctx.world;
-  if (a.conjointId !== undefined || b.conjointId !== undefined || !vivant(a) || !vivant(b)) return;
-  const femme = a.sexe === 'f' ? a : b, homme = a.sexe === 'h' ? a : b;
-  const matri = femme.titres.length > 0 && rangMax(w, femme) > rangMax(w, homme)
-    || (estHeritierPrincipal(w, femme) && femme.sexe === 'f' && !perso(w, femme.pereId)?.enfants.some((id) => { const k = w.personnages[id]!; return vivant(k) && k.sexe === 'h' && !k.batard; }));
-  marier(ctx, a, b, !!matri);
-  void r;
+/** Une fille héritière (sans frère légitime vivant) se marie de préférence en lignée matrilinéaire. */
+function estHeritiere(w: SimContext['world'], f: Character): boolean {
+  if (f.titres.length) return true;
+  const p = perso(w, f.pereId);
+  if (!vivant(p) || !p.titres.length) return false;
+  return estHeritierPrincipal(w, f) || !p.enfants.some((id) => { const k = w.personnages[id]!; return vivant(k) && k.sexe === 'h' && !k.batard && !k.clerc; });
 }
 
 function genererConjoint(ctx: SimContext, r: Regles, dep: Character): Character {
@@ -155,7 +124,7 @@ function genererConjoint(ctx: SimContext, r: Regles, dep: Character): Character 
   return c;
 }
 
-// ------------------------------------------------------------------ Cadeaux
+// ------------------------------------------------------------------ Cadeaux, terres, aide, alliances
 
 function optionsCadeau(ctx: SimContext, r: Regles, c: Character): Option[] {
   const w = ctx.world;
@@ -169,13 +138,55 @@ function optionsCadeau(ctx: SimContext, r: Regles, c: Character): Option[] {
     { source: 'Ambition', valeur: c.ambition === 'amitie' || c.ambition === 'puissance' ? 4 : 0 },
   ].filter((x) => x.valeur);
   const score = raisons.reduce((a, x) => a + x.valeur, 0);
-  const montant = Math.max(10, Math.round(c.or * 0.2));
-  return [{ action: 'offrir un cadeau au suzerain', cible: s.id, score, raisons, executer: () => {
-    c.or -= montant; s.or += montant;
-    avis(s, c.id, 15, `Cadeau de ${montant} pièces d'or`, addYears(w.day, 10));
-    memoriser(s, 'cadeau-recu', w.day, `Cadeau de ${nomComplet(w, c)}`, c.id, 0.4);
-    if (concerneJoueur(w, [s.id]) && w.joueurId === s.id) notifier(w, `${nomComplet(w, c)} vous offre ${montant} pièces d'or.`, false, [c.id]);
-  } }];
+  const montant = c.or >= 90 ? 60 : c.or >= 45 ? 30 : 10;
+  return [{ action: 'offrir un cadeau au suzerain', cible: s.id, score, raisons, executer: () => { executer({ sim: ctx, r, w }, 'cadeau', c, s, { montant }); } }];
+}
+
+/** Un grand seigneur dote son fils adulte sans terre d'un comté. */
+function optionsDoterFils(ctx: SimContext, r: Regles, c: Character): Option[] {
+  const w = ctx.world;
+  const nb = comtesTenus(w, c).length;
+  if (nb < 4) return [];
+  const fils = c.enfants.map((id) => w.personnages[id]!).filter((k) => vivant(k) && majeur(w, k) && !k.titres.length && !k.clerc && !k.batard && k.prisonnierDe === undefined && k.courId === c.id);
+  const k = fils.sort((a, b) => a.naissance - b.naissance)[1] ?? (nb >= 6 ? fils[0] : undefined); // de préférence un cadet
+  if (!k) return [];
+  const ci: C = { sim: ctx, r, w };
+  const it = interaction('accorder-titre')!;
+  const opts = it.parametres![0]!.options(ci, c, k);
+  if (!opts.length) return [];
+  const titre = opts[opts.length - 1]!.valeur;                  // le comté le moins riche
+  const raisons: Part[] = [
+    { source: 'Grand domaine', valeur: (nb - 3) * 3 },
+    { source: 'Doter ses enfants', valeur: c.ambition === 'famille' ? 8 : 3 },
+    { source: 'Garder ses terres', valeur: c.ambition === 'puissance' || c.ambition === 'richesse' ? -6 : 0 },
+    { source: 'Compassion', valeur: axe(r, c, 'compassion') * 2 },
+  ].filter((x) => x.valeur);
+  return [{ action: 'doter un fils', cible: k.id, score: raisons.reduce((a, x) => a + x.valeur, 0), raisons, executer: () => { executer(ci, 'accorder-titre', c, k, { titre }); } }];
+}
+
+function optionsAideOr(ctx: SimContext, r: Regles, c: Character): Option[] {
+  const w = ctx.world;
+  if (!c.titres.length || c.or > 5) return [];
+  const riches = w.vivants.map((id) => w.personnages[id]!).filter((v) => v.suzerainId === c.id && v.titres.length && v.or >= 30).sort((a, b) => b.or - a.or);
+  const v = riches[0]; if (!v) return [];
+  const ci: C = { sim: ctx, r, w };
+  return [{ action: 'réclamer une aide en or', cible: v.id, score: 14 - c.or, raisons: [{ source: 'Trésor vide', valeur: 14 - Math.round(c.or) }], executer: () => { executer(ci, 'aide-or', c, v, { part: 0.2 }); } }];
+}
+
+function optionsAlliance(ctx: SimContext, r: Regles, c: Character): Option[] {
+  const w = ctx.world;
+  if (!c.titres.length || !ctx.rng.chance(0.2)) return [];
+  const ci: C = { sim: ctx, r, w };
+  const it = interaction('alliance')!;
+  const cands = w.vivants.map((id) => w.personnages[id]!).filter((x) => x.titres.length && x.id !== c.id && it.visible(ci, c, x));
+  if (!cands.length) return [];
+  const x = cands[ctx.rng.int(0, cands.length - 1)]!;
+  const ev = evaluer(ci, it, c, x, {});
+  if (!ev.possible || (ev.decideur?.id !== w.joueurId && !ev.acceptation?.accepte)) return [];
+  if (ev.decideur?.id === w.joueurId && w.propositions.some((p) => p.acteur === c.id)) return [];
+  const op = opinionTotal(w, r, c, x);
+  const score = 4 + op / 6 + (c.ambition === 'puissance' ? 4 : 0);
+  return [{ action: 'proposer une alliance', cible: x.id, score, raisons: [{ source: `Opinion (${op})`, valeur: Math.round(op / 6) }, { source: 'Chercher des appuis', valeur: 4 }], executer: () => { executer(ci, 'alliance', c, x, {}); } }];
 }
 
 // ------------------------------------------------------------------ Vœux religieux

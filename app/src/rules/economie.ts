@@ -16,6 +16,8 @@ export function budget(w: World, c: Character): { solde: number; parts: Part[] }
   const parts: Part[] = [];
   const dom = revenuDomaine(w, c);
   if (dom) parts.push({ source: 'Revenus de vos terres', valeur: dom });
+  const intendant = w.personnages[w.conseils[c.id]?.intendant ?? -1];
+  if (dom && intendant && intendant.deces === undefined) parts.push({ source: `Intendant (${intendant.prenom})`, valeur: dom * intendant.competences.ges * 0.012 });
   if (c.suzerainId !== undefined && c.titres.length) parts.push({ source: 'Impôt versé au suzerain', valeur: -dom * IMPOT_VASSAL });
   let impots = 0;
   for (const id of w.vivants) {

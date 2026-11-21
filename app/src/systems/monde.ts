@@ -1,4 +1,4 @@
-import { addYears, type Day } from '../engine/calendar';
+import { addYears, ageAt, type Day } from '../engine/calendar';
 import type { SimContext } from '../engine/sim';
 import { SKILLS, type Character, type MemoryKind, type Sex, type Skills } from '../model/entities';
 import type { World } from '../model/world';
@@ -120,6 +120,7 @@ export function mourir(ctx: SimContext, r: Regles, c: Character, cause: string):
   for (const id of [c.pereId, c.mereId, ...c.enfants]) {
     const k = perso(w, id); if (vivant(k)) memoriser(k, 'mort-proche', w.day, `Mort de ${nomComplet(w, c)}`, c.id, 0.7);
   }
+  nettoyerApresDeces(w, c);
   const notable = c.titres.length > 0 || estNotable(w, c);
   const etaitJoueur = w.joueurId === c.id;
   const succ = c.titres.length > 0 ? appliquerSuccession(ctx, r, c) : undefined;
@@ -147,6 +148,35 @@ export function mourir(ctx: SimContext, r: Regles, c: Character, cause: string):
   }
 }
 
+/**
+ * Conséquences d'une disparition sur les liens : prisonniers libérés, alliances et fiançailles
+ * rompues, conseil, prêts, propositions — et rancunes transmises aux enfants.
+ */
+function nettoyerApresDeces(w: World, c: Character): void {
+  for (const id of w.vivants) {
+    const x = w.personnages[id]!;
+    if (x.prisonnierDe === c.id) delete x.prisonnierDe;
+    if (x.fianceId === c.id) { delete x.fianceId; delete x.fiancesMatrilineaire; }
+    if (x.tuteurId === c.id) delete x.tuteurId;
+  }
+  delete c.fianceId; delete c.prisonnierDe;
+  w.alliances = w.alliances.filter((a) => a.a !== c.id && a.b !== c.id);
+  delete w.conseils[c.id];
+  for (const cons of Object.values(w.conseils)) for (const k of Object.keys(cons) as (keyof typeof cons)[]) if (cons[k] === c.id) delete cons[k];
+  w.prets = w.prets.filter((p) => p.debiteur !== c.id);
+  w.propositions = w.propositions.filter((p) => p.acteur !== c.id && p.cible !== c.id);
+  // Les grandes rancunes (permanentes) passent aux enfants adultes, atténuées de moitié
+  for (const id of c.enfants) {
+    const k = w.personnages[id];
+    if (!k || k.deces !== undefined || k.horsScene !== undefined || ageAt(k.naissance, w.day) < 16) continue;
+    for (const o of c.opinions) {
+      if (o.valeur <= -40 && o.jusqua === undefined && o.cible !== k.id && !o.raison.startsWith('Rancune héritée')) {
+        avis(k, o.cible, Math.round(o.valeur / 2), `Rancune héritée de ${c.prenom} : ${o.raison.charAt(0).toLowerCase()}${o.raison.slice(1)}`);
+      }
+    }
+  }
+}
+
 /** Transmet les titres du défunt et réorganise la vassalité. */
 export function appliquerSuccession(ctx: SimContext, r: Regles, defunt: Character): { principal?: number } {
   const w = ctx.world;
@@ -164,6 +194,7 @@ export function appliquerSuccession(ctx: SimContext, r: Regles, defunt: Characte
   }
   for (const a of plan.attributions) donnerTitre(w, a.titre, w.personnages[a.heritier]);
   const aine = w.personnages[plan.principal!]!;
+  for (const p of w.prets) if (p.creancier === defunt.id) p.creancier = aine.id;
   const heritiers = [...new Set(plan.attributions.map((a) => a.heritier))].map((id) => w.personnages[id]!);
 
   // Vassalité des héritiers

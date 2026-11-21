@@ -8,6 +8,7 @@ import { construireMonde } from '../scenario/build';
 import { systemesDemographie } from '../systems/demographie';
 import { systemesEconomie } from '../systems/economie';
 import { systemesRelations } from '../systems/relations';
+import { systemesLiens } from '../systems/liens';
 import { systemeIA } from '../ai/ia';
 import { JournalIA } from '../ai/journal';
 
@@ -33,6 +34,7 @@ export function build(world: World, data: GameData = loadData()): Partie {
   systemesDemographie(sim, regles);
   systemesEconomie(sim);
   systemesRelations(sim, regles);
+  systemesLiens(sim, regles);
   systemeIA(sim, regles, journal);
   return { sim, regles, journal };
 }

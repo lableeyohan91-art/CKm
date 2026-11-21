@@ -34,6 +34,15 @@ export function opinion(w: World, r: Regles, de: Character, vers: Character): { 
     add('Vassal loyal', axe(r, de, 'loyaute') > 0 ? 10 : 0);
   }
 
+  // Conseil : en être flatte ; un bon chancelier adoucit les vassaux
+  const cons = w.conseils[vers.id];
+  if (cons && Object.values(cons).includes(de.id)) add('Membre de son conseil', 10);
+  if (cons?.chancelier !== undefined && de.suzerainId === vers.id && de.titres.length) {
+    const ch = w.personnages[cons.chancelier];
+    if (ch && ch.deces === undefined) add('Habileté de son chancelier', Math.floor(ch.competences.dip / 3));
+  }
+  if (de.prisonnierDe === vers.id) add('Retenu prisonnier', -20);
+
   // Culture et religion
   if (de.cultureId !== vers.cultureId) add('Culture différente', -5);
   if (de.religionId !== vers.religionId) add('Religion différente', -25);

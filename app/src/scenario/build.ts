@@ -5,6 +5,7 @@ import { SKILLS, type Character, type Sex, type Skills } from '../model/entities
 import type { World } from '../model/world';
 import { buildRegles, type Regles } from '../rules/regles';
 import { creerPersonnage, donnerTitre, marier } from '../systems/monde';
+import { conseilsInitiaux } from '../systems/liens';
 
 /**
  * Construit le monde de départ (1066) à partir des fichiers de scénario.
@@ -79,6 +80,7 @@ export function construireMonde(seed: string, data: GameData): World {
   }
 
   peuplerCours(ctx, r);
+  conseilsInitiaux(ctx, r);
   w.stats.mariages = 0;
   w.chronicle = [{ day: w.day, kind: 'systeme', text: 'Début de la chronique : Harold vient d’être couronné roi d’Angleterre.' }];
   return sim.sync();

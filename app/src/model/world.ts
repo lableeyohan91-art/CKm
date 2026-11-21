@@ -1,6 +1,6 @@
 import type { Day } from '../engine/calendar';
 import type { RngState } from '../engine/rng';
-import type { Character, County, Dynasty, House, Notification, Relation, Title } from './entities';
+import type { Alliance, Character, County, Dynasty, House, Notification, Poste, Pret, Proposition, Relation, Title } from './entities';
 
 /** Élément de la file datée : un traitement à exécuter à une date précise. */
 export interface ScheduledItem {
@@ -49,7 +49,13 @@ export interface World {
   joueurId: number | null;                // null : mode observateur
   finDePartie?: string;
   notifications: Notification[];
+
+  // --- v3 : interactions ---
+  conseils: Record<number, Partial<Record<Poste, number>>>;   // par seigneur
+  alliances: Alliance[];
+  prets: Pret[];
+  propositions: Proposition[];
 }
 
-/** v1 : version d'essai 0.0.1 (monde vide). v2 : monde vivant (phase 1). */
-export const WORLD_SCHEMA_VERSION = 2;
+/** v1 : version d'essai 0.0.1 (monde vide). v2 : monde vivant (phase 1). v3 : interactions. */
+export const WORLD_SCHEMA_VERSION = 3;

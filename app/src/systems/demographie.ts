@@ -19,16 +19,8 @@ export function risqueAnnuel(a: number): number {
   return 0.32;
 }
 
-/** Fertilité d'une femme selon son âge (1 = maximale). */
-export function fertiliteAge(a: number): number {
-  if (a < 16) return 0;
-  if (a <= 30) return 1;
-  if (a <= 35) return 0.75;
-  if (a <= 40) return 0.45;
-  if (a <= 45) return 0.15;
-  if (a <= 48) return 0.04;
-  return 0;
-}
+export { fertiliteAge } from '../rules/mariage';
+import { fertiliteAge } from '../rules/mariage';
 
 const CONCEPTION = 0.045;   // chance mensuelle de base pour un couple fertile
 
@@ -134,10 +126,16 @@ function anniversaires(ctx: SimContext, r: Regles): void {
     if (a >= MAJORITE && nbPerso < 3) {
       c.traits = tirerTraitsHerites(ctx, w, r, c, persoIds, 3);
       if (!c.traits.some((t) => r.education.has(t))) {
-        const best = (['dip', 'gue', 'ges', 'int', 'sav'] as const).reduce((x, s) => (c.competences[s] > c.competences[x] ? s : x), 'dip' as 'dip' | 'gue' | 'ges' | 'int' | 'sav');
-        const edu = r.data.traits.education.find((e) => e.competence === best)!;
+        const tuteur = perso(w, c.tuteurId);
+        const skills = ['dip', 'gue', 'ges', 'int', 'sav'] as const;
+        const meilleure = (x: Character) => skills.reduce((m, s) => (x.competences[s] > x.competences[m] ? s : m), 'dip' as (typeof skills)[number]);
+        const voulue = c.educationVoulue && c.educationVoulue !== 'val' ? c.educationVoulue : undefined;
+        const comp = voulue ?? (vivant(tuteur) ? meilleure(tuteur) : meilleure(c));
+        const edu = r.data.traits.education.find((e) => e.competence === comp)!;
         c.traits.push(edu.id);
-        c.competences[best] += ctx.rng.int(1, 3);
+        const bonusTuteur = vivant(tuteur) ? Math.floor(tuteur.competences[comp] / 6) : 0;
+        c.competences[comp] += ctx.rng.int(1, 3) + bonusTuteur;
+        delete c.tuteurId; delete c.educationVoulue;
       }
       if (!c.ambition) c.ambition = choisirAmbition(r, c);
     }
